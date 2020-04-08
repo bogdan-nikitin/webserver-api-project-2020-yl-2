@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <div class="login-form-wrapper">
+            <p class="login-form-header">Войти в PyMessages</p>
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="form-group login-form-full-width-field">
+                    {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder=form.username.label_name) }}
+                    {% for error in form.username.errors %}
+                    <div class="invalid-feedback">
+                        {{ translate_wtforms_error(error) }}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group login-form-full-width-field">
+                    {{ form.password(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder=form.password.label_name) }}
+                    {% for error in form.password.errors %}
+                    <div class="invalid-feedback">
+                        {{ translate_wtforms_error(error) }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% for error in form.password.errors %}
+                {% endfor %}
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      {{ form.remember_me(class="custom-control-input") }}
+                      {{ form.remember_me.label(class="custom-control-label") }}
+                    </div>
+                </div>
+                {{ form.submit(type="submit", class="btn login-form-sign-in-btn login-form-full-width-field", role="button") }}
+            </form>
+            <div class="login-form-bottom-text">
+                <!-- TODO Вставить реальные ссылки -->
+                <a class="login-form-forgot-password login-form-link" href="#">Забыли пароль?</a>
+                &#183;
+                <a class="login-form-create-account login-form-link" href="#">Зарегистрироваться в PyMessages</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
