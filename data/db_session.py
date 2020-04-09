@@ -25,10 +25,10 @@ def global_init(db_file):
 
     SqlAlchemyBase.metadata.create_all(engine)
 
-    from . import AdditivesTypesSetting
+    from . import additives_types_setting
 
     session = create_session()
-    AdditivesTypesSetting.set_types_table(session)
+    additives_types_setting.set_types_table(session)
     session.commit()
 
 

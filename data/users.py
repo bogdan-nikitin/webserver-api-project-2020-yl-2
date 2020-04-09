@@ -1,10 +1,13 @@
 import datetime
 import sqlalchemy
 from sqlalchemy import orm
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 from .db_session import SqlAlchemyBase
+from .users_friends import UsersFriends
 
 
-class Users(SqlAlchemyBase):
+class Users(SqlAlchemyBase, UserMixin):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
@@ -19,8 +22,16 @@ class Users(SqlAlchemyBase):
     city = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     additional_inf = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     is_confirmed = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
-    # hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
 
     messages = orm.relation('Messages', backref='user')
+    friends = orm.relation('UsersFriends', backref='inviter',
+                           foreign_keys=[UsersFriends.inviter_id])
+
+    def set_password(self, password):
+        self.hashed_password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.hashed_password, password)

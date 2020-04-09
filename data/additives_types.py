@@ -9,4 +9,3 @@ class AdditivesTypes(SqlAlchemyBase):
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
     title = sqlalchemy.Column(sqlalchemy.String)
-    # example = orm.relation('Additives', backref='additive_type', uselist=False)
