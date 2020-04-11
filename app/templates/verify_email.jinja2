@@ -1,0 +1,14 @@
+{% extends "report.jinja2" %}
+
+{% block report_content %}
+<div class="verify-email-block">
+    <div class="verify-email-message">
+        Мы отправили письмо с подтверждением на вашу электронную почту<br>
+        Чтобы продолжить регистрацию, перейдите по ссылке из письма.<br>
+        Если вы не можете найти письмо, попробуйте проверить спам.
+    </div>
+    <a href="{{ email_server }}" class="btn green-btn btn-lg" role="button">
+        Перейти в почтовый ящик
+    </a>
+</div>
+{% endblock %}

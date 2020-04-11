@@ -1,0 +1,12 @@
+{% extends "report.jinja2" %}
+
+{% block report_content %}
+<div class="email-verified-block">
+    <div class="email-verified-block-message">
+        Ваш адрес электронный почты успешно подтверждён
+    </div>
+    <a href="{{ url_for('main.login') }}" class="btn green-btn btn-lg" role="button">
+        Войти
+    </a>
+</div>
+{% endblock %}

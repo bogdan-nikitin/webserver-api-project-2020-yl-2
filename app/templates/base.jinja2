@@ -64,12 +64,11 @@
                             <nav>
                                 <ul class="page-footer-nav-links-list page-footer-links">
                                     <!-- TODO Вставить реальные ссылки -->
+                                    {% for title, link in constants.PAGE_NAV_LINKS.items() %}
                                     <li class="page-footer-link-elem">
-                                        <a href="#" class="page-footer-link">О нас</a>
+                                        <a href="{{ url_for(link) }}" class="page-footer-link">{{ title }}</a>
                                     </li>
-                                    <li class="page-footer-link-elem">
-                                        <a href="#" class="page-footer-link">Справка</a>
-                                    </li>
+                                    {% endfor %}
                                 </ul>
                             </nav>
                         </div>
