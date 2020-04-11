@@ -1,6 +1,7 @@
-from functools import lru_cache, wraps
-from wtforms import Field
 import typing
+from functools import lru_cache, wraps
+
+from wtforms import Field
 
 
 @lru_cache()  # Кэшируем результаты, дабы не плодить миллионы классов
@@ -12,6 +13,7 @@ def named_flask_form_field(wtforms_field: typing.ClassVar[Field]):
     :param wtforms_field: класс поля wtforms.Field, от которого нужно
     наследоваться.
     """
+
     class NamedFlaskForm(wtforms_field):
         @wraps(wtforms_field.__init__)
         def __init__(self, label, *args, **kwargs):
@@ -19,4 +21,3 @@ def named_flask_form_field(wtforms_field: typing.ClassVar[Field]):
             super().__init__(label, *args, **kwargs)
 
     return NamedFlaskForm
-

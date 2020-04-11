@@ -3,10 +3,23 @@
 .form-field-error{
     margin-top: 10px;
 }
+.form-full-width-field{
+    width: 100%;
+}
+.green-btn{
+    background-color: #00A748;
+    color: white;
+}
+.green-btn:hover{
+    background-color: #008B3C;
+    color: white;
+}
+.white-plate{
+    background-color: white;
+}
 
 
-
-/* base.html */
+/* base.jinja2 */
 
 .page-header-logo{
     width: 35px;
@@ -69,13 +82,12 @@
 
 
 
-/* login.html */
+/* login.jinja2 */
 
 .login-form-wrapper{
     margin: 140px auto;
     max-width: 400px;
-    background-color: white;
-    padding: 40px 15px;
+    padding: 30px 15px;
 }
 .login-form-header{
     text-align: center;
@@ -83,20 +95,60 @@
     font-size: 18px;
 }
 .login-form-sign-in-btn{
-    background-color: #00A748;
-    color: white;
-    margin-bottom: 5px;
-}
-.login-form-sign-in-btn:hover{
-    background-color: #008B3C;
-    color: white;
-}
-.login-form-full-width-field{
-    width: 100%;
+    margin-bottom: 10px;
 }
 .login-form-link{
     font-size: 15px;
 }
 .login-form-bottom-text{
     text-align: center;
+}
+
+
+
+/* register.jinja2 */
+
+.register-form-wrapper{
+    margin: 140px auto;
+    max-width: 400px;
+    padding: 30px 15px;
+}
+.register-form-header{
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 18px;
+}
+.register-form-sign-up-btn{
+    margin-top: 20px;
+    margin-bottom: 5px;
+    height: 45px;
+}
+
+
+
+/* report.jinja2 */
+
+.report-block{
+    text-align: center;
+    padding: 30px 15px;
+    margin: 140px auto;
+    max-width: 800px;
+    font-size: 20px;
+}
+
+
+
+/* verify_email.jinja2 */
+
+.verify-email-message{
+    margin-bottom: 20px;
+}
+.verify-mail-go-to-email-btn{
+    vertical-align: middle;
+    height: 50px;
+}
+
+/* email_verified.jinja2 */
+.email-verified-block-message{
+    margin-bottom: 20px;
 }
