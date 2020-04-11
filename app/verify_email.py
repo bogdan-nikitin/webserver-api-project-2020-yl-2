@@ -1,4 +1,5 @@
 import hashlib
+
 from flask import current_app
 
 

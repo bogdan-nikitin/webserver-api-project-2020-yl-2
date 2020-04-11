@@ -9,12 +9,10 @@ from flask import (Blueprint, render_template, redirect, url_for, abort,
 from flask_login import current_user
 from flask_mail import Message
 
-from app.forms import LoginForm, RegisterForm
-
-from modules import constants
-from app.verify_email import create_token
 from app.email import send_msg_in_thread
-
+from app.forms import LoginForm, RegisterForm
+from app.verify_email import create_token
+from modules import constants
 
 blueprint = Blueprint('main', __name__)
 
@@ -114,4 +112,3 @@ def verify_email(token):
         }
         return render_template('email_verified.jinja2', **param)
     abort(403)
-

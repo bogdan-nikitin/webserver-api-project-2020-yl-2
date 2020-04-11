@@ -1,9 +1,11 @@
 """Модуль для отправки email через текущее приложение."""
 
 import threading
-from app.setup_app import mail
+
 from flask import current_app
 from flask_mail import Message, Mail
+
+from app.setup_app import mail
 
 
 def send_msg_in_thread(msg: Message, mail_obj: Mail = mail):

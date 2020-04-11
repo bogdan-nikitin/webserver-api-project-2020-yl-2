@@ -1,11 +1,13 @@
 """Пакет приложения. Содержит фабрику приложений create_app, а также функции,
 используемые в обработчике шаблонов Jinja2."""
 
-import re
 import logging
-from app.setup_app import *
+import re
+
 from flask import Flask
+
 from app.blueprints import main
+from app.setup_app import *
 from modules import constants
 
 
