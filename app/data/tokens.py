@@ -1,13 +1,17 @@
+import datetime
+
 import sqlalchemy
+
 from .db_session import SqlAlchemyBase
 
 
-class ChatParticipants(SqlAlchemyBase):
-    __tablename__ = 'chat participants'
+class Tokens(SqlAlchemyBase):
+    __tablename__ = 'tokens'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
     user_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey('users.id'))
-    chat_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                sqlalchemy.ForeignKey('chats.id'))
+    token = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    created_date = sqlalchemy.Column(sqlalchemy.DateTime,
+                                     default=datetime.datetime.now)
