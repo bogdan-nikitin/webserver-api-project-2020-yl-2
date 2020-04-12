@@ -4,12 +4,12 @@
 import logging
 import urllib.parse
 
-from flask import (Blueprint, render_template, redirect, url_for, abort,
-                   session)
+import flask
+from flask import Blueprint, render_template, redirect, url_for, abort
 from flask_login import current_user
 from flask_mail import Message
 
-from app.email import send_msg_in_thread
+from app.email_utils import send_msg_in_thread
 from app.forms import LoginForm, RegisterForm
 from app.verify_email import create_token
 from modules import constants
@@ -17,6 +17,7 @@ from modules import constants
 blueprint = Blueprint('main', __name__)
 
 
+@blueprint.route('/index', methods=['POST', 'GET'])
 @blueprint.route('/', methods=['POST', 'GET'])
 def index():
     # TODO Заглушка. Может только отображать форму входа.
@@ -47,7 +48,7 @@ def register():
 
         # Сохраняем email в сессии, чтобы дать пользователю ссылку на его
         # почтовый ящик на странице подтверждения email
-        session['email'] = email
+        flask.session['email'] = email
 
         # Создаём токен, по которому будем подтверждать email пользователя и
         # отправляем ему ссылку с подтверждением на email
@@ -83,7 +84,7 @@ def register():
 def verify_email_message():
     # Если пользователь только что создал аккаунт и указал рабочую почту, то
     # просим его перейти в почтовый ящик и подтвердить почту
-    email = session.get('email')
+    email = flask.session.get('email')
     if email and '@' in email:
         mail_domain = email[email.index('@') + 1:]
         # Ищем URL почты пользователя,

@@ -10,6 +10,8 @@ from app.blueprints import main
 from app.setup_app import *
 from modules import constants
 
+from app.data import db_session
+
 
 def translate_wtforms_error(error_text):
     """Функция переводит ошибки, генерируемые полями из модуля wtforms на
@@ -48,5 +50,8 @@ def create_app() -> Flask:
         'translate_wtforms_error'] = translate_wtforms_error
     app.jinja_env.globals['re'] = re
     app.jinja_env.globals['constants'] = constants
+
+    # Инициализация БД
+    db_session.global_init(constants.DB_PATH)
 
     return app

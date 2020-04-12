@@ -52,3 +52,7 @@ MAIL_DOMAINS_URLS = {
     "inbox.lv": "https://www.inbox.lv/",
     "mail.kz": "http://mail.kz/"
 }
+
+ADDITIVE_TYPES_TITLES = ['photo', 'video', 'audio', 'sticker', 'file']
+
+DB_PATH = os.path.join(ROOT_DIR, 'db/messenger.sqlite3')
