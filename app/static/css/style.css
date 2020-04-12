@@ -1,0 +1,154 @@
+/* Общие стили */
+
+.form-field-error{
+    margin-top: 10px;
+}
+.form-full-width-field{
+    width: 100%;
+}
+.green-btn{
+    background-color: #00A748;
+    color: white;
+}
+.green-btn:hover{
+    background-color: #008B3C;
+    color: white;
+}
+.white-plate{
+    background-color: white;
+}
+
+
+/* base.jinja2 */
+
+.page-header-logo{
+    width: 35px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+.page-header-app-name{
+    font-weight: 700;
+    font-size: 18px;
+    color: white;
+}
+.page-header-logo-and-name{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+.page-header-logo-and-name *:not(:last-child){
+    margin-right: 5px;
+}
+.page-header{
+    height: 45px;
+    background-color: #00A748;
+    display: flex;
+    align-items: center;
+}
+
+.page-main{
+    background-color: #F0F1F3;
+}
+
+.page-footer{
+    padding-top: 15px;
+    padding-bottom: 45px;
+}
+.page-footer-links{
+    margin: 0;
+    padding: 0 15px;
+}
+.page-footer-languages-hr-links{
+    margin: 5px auto;
+}
+.page-footer-link-elem{
+    display: inline;
+    font-size: 12px;
+}
+.page-footer-link{
+    color: #51ACFF;
+}
+.page-footer-app-name{
+    color: lightgray;
+    padding: 0 15px;
+    font-size: 12px;
+}
+.page-footer-nav-block{
+    margin-bottom: 10px;
+}
+.page-footer-links .page-footer-link-elem:not(:last-child){
+    margin-right: 6px;
+}
+
+
+
+/* login.jinja2 */
+
+.login-form-wrapper{
+    margin: 140px auto;
+    max-width: 400px;
+    padding: 30px 15px;
+}
+.login-form-header{
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 18px;
+}
+.login-form-sign-in-btn{
+    margin-bottom: 10px;
+}
+.login-form-link{
+    font-size: 15px;
+}
+.login-form-bottom-text{
+    text-align: center;
+}
+
+
+
+/* register.jinja2 */
+
+.register-form-wrapper{
+    margin: 140px auto;
+    max-width: 400px;
+    padding: 30px 15px;
+}
+.register-form-header{
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 18px;
+}
+.register-form-sign-up-btn{
+    margin-top: 20px;
+    margin-bottom: 5px;
+    height: 45px;
+}
+
+
+
+/* report.jinja2 */
+
+.report-block{
+    text-align: center;
+    padding: 30px 15px;
+    margin: 140px auto;
+    max-width: 800px;
+    font-size: 20px;
+}
+
+
+
+/* verify_email.jinja2 */
+
+.verify-email-message{
+    margin-bottom: 20px;
+}
+.verify-mail-go-to-email-btn{
+    vertical-align: middle;
+    height: 50px;
+}
+
+/* email_verified.jinja2 */
+.email-verified-block-message{
+    margin-bottom: 20px;
+}
