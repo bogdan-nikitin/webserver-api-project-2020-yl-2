@@ -1,3 +1,5 @@
+import datetime
+
 import sqlalchemy
 from sqlalchemy import orm
 
@@ -13,3 +15,6 @@ class Messages(SqlAlchemyBase):
                                   sqlalchemy.ForeignKey('users.id'),
                                   nullable=False)
     additives = orm.relation('Additives', backref='message')
+    sending_date = sqlalchemy.Column(sqlalchemy.DateTime,
+                                     default=datetime.datetime.now)
+    is_read = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
