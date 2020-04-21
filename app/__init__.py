@@ -5,12 +5,14 @@ import logging
 import re
 
 from flask import Flask
+from flask_restful import Api
 
 from app.blueprints import main
 from app.setup_app import *
 from modules import constants
 
 from app.data import db_session
+from app.api import users_resource
 
 
 def translate_wtforms_error(error_text):
@@ -31,6 +33,10 @@ def create_app() -> Flask:
     :rtype: Flask
     """
     app = Flask(__name__)
+
+    api = Api(app)
+    api.add_resource(users_resource.UsersListResource, '/api/users')
+    api.add_resource(users_resource.UsersResource, '/api/users/<int:user_id>')
 
     # Конфигурация приложения
     app.config.from_object(constants.APP_CONFIG)

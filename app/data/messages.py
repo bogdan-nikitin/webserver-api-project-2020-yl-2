@@ -12,4 +12,8 @@ class Messages(SqlAlchemyBase):
     sender_id = sqlalchemy.Column(sqlalchemy.Integer,
                                   sqlalchemy.ForeignKey('users.id'),
                                   nullable=False)
+    chat_id = sqlalchemy.Column(sqlalchemy.Integer,
+                                sqlalchemy.ForeignKey('chats.id'),
+                                nullable=False)
+    text = sqlalchemy.Column(sqlalchemy.String)
     additives = orm.relation('Additives', backref='message')
