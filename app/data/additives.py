@@ -13,4 +13,4 @@ class Additives(SqlAlchemyBase):
                                              'additives_types.id'))
     message_id = sqlalchemy.Column(sqlalchemy.Integer,
                                    sqlalchemy.ForeignKey('messages.id'))
-    additive = sqlalchemy.Column(sqlalchemy.String)
+    additive = sqlalchemy.Column(sqlalchemy.BLOB)

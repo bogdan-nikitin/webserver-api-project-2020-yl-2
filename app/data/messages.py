@@ -1,5 +1,3 @@
-import datetime
-
 import sqlalchemy
 from sqlalchemy import orm
 
@@ -14,7 +12,8 @@ class Messages(SqlAlchemyBase):
     sender_id = sqlalchemy.Column(sqlalchemy.Integer,
                                   sqlalchemy.ForeignKey('users.id'),
                                   nullable=False)
+    chat_id = sqlalchemy.Column(sqlalchemy.Integer,
+                                sqlalchemy.ForeignKey('chats.id'),
+                                nullable=False)
+    text = sqlalchemy.Column(sqlalchemy.String)
     additives = orm.relation('Additives', backref='message')
-    sending_date = sqlalchemy.Column(sqlalchemy.DateTime,
-                                     default=datetime.datetime.now)
-    is_read = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
