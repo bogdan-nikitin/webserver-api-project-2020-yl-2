@@ -35,8 +35,8 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     api = Api(app)
-    api.add_resource(users_resource.UsersListResource, '/api/users')
-    api.add_resource(users_resource.UsersResource, '/api/users/<int:user_id>')
+    api.add_resource(users_resource.UsersResource, '/api/users',
+                     '/api/users/<int:user_id>')
 
     # Конфигурация приложения
     app.config.from_object(constants.APP_CONFIG)

@@ -1,3 +1,4 @@
+import flask_login
 from flask import jsonify
 from flask_restful import Resource, abort
 
@@ -14,40 +15,41 @@ def abort_if_not_found(user_id):
 
 
 class UsersResource(Resource):
-    def get(self, user_id):
+    def get(self, user_id=None):
+        if user_id is None:
+            user_id = flask_login.current_user.id
         abort_if_not_found(user_id)
         session = db_session.create_session()
         user = session.query(Users).get(user_id)
-        return jsonify({'user': user.to_dict()})
+        if (flask_login.current_user.is_authenticated and
+                user.alternative_id == flask_login.current_user.alternative_id):
+            return jsonify({'user': user.to_dict(
+                only=('alternative_id', 'first_name', 'second_name', 'email',
+                      'phone_number', 'age', 'city', 'additional_inf',
+                      'is_confirmed', 'api_key', 'avatar', 'created_date')
+            )})
+        else:
+            return jsonify({'user': user.to_dict(
+                only=('first_name', 'second_name', 'email')
+            )})
 
     def put(self, user_id):
         abort_if_not_found(user_id)
         args = parser_edit.parse_args()
         session = db_session.create_session()
         user = session.query(Users).get(user_id)
-        if not args['password']:
-            return jsonify({'error': 'Bad request'})
-        # для редактирования пользователя нужно знать его пароль
-        if not user.check_password(args['password']):
-            return jsonify({'error': 'Passwords do not match'})
-        user.first_name = args.get('first_name') if args.get('first_name') \
-            else user.first_name
-        user.second_name = args.get('second_name') if args.get('second_name') \
-            else user.second_name
-        user.email = args.get('email') if args.get('email') else user.email
-        user.phone_number = args.get('phone_number') \
-            if args.get('phone_number') else user.phone_number
-        user.age = args.get('age') if args.get('age') else user.age
-        user.additional_inf = args.get('additional_inf') \
-            if args.get('additional_inf') else user.additional_inf
-        user.city = args.get('city') if args.get('city') else user.city
-        user.avatar = args.get('avatar') if args.get('avatar') else user.avatar
+        user.first_name = args.get('first_name') or user.first_name
+        user.second_name = args.get('second_name') or user.second_name
+        user.email = args.get('email') or user.email
+        user.phone_number = args.get('phone_number') or user.phone_number
+        user.age = args.get('age') or user.age
+        user.additional_inf = args.get('additional_inf') or user.additional_inf
+        user.city = args.get('city') or user.city
+        user.avatar = args.get('avatar') or user.avatar
         session.add(user)
         session.commit()
         return jsonify({'success': 'OK'})
 
-
-class UsersListResource(Resource):
     def post(self):
         args = parser.parse_args()
         session = db_session.create_session()
