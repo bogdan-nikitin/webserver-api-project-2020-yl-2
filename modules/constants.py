@@ -7,9 +7,8 @@ import os
 __parent_dir = '..'
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                         __parent_dir))
-LOGGING_CONFIG_FILE = os.path.join(ROOT_DIR, 'logging.ini')
 
-APP_CONFIG = 'app.config.DevelopmentConfig'
+LOGGING_CONFIG_FILE = os.path.join(ROOT_DIR, 'logging.ini')
 
 # Перевод ошибок wtforms
 WTFORMS_ERRORS_TRANSLATION = {
@@ -53,6 +52,11 @@ MAIL_DOMAINS_URLS = {
     "mail.kz": "http://mail.kz/"
 }
 
-ADDITIVE_TYPES_TITLES = ['photo', 'video', 'audio', 'sticker', 'file']
+ADDITIVE_TYPES_TITLES = ('photo', 'video', 'audio', 'sticker', 'file')
 
-DB_PATH = os.path.join(ROOT_DIR, 'db/messenger.sqlite3')
+USER_DATA_PATH = os.path.join(ROOT_DIR, 'user_data')
+
+DB_PATH = os.path.join(USER_DATA_PATH, 'db/messenger.sqlite3')
+UPLOAD_PATH = os.path.join(USER_DATA_PATH, 'upload')
+
+ALLOWED_USER_AVATAR_EXTENSIONS = {'png', 'jpg', 'jpeg'}

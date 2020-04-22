@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
+    {% block head %}{% endblock %}
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
@@ -12,73 +13,111 @@
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
             integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
             crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/x-icon"
+          href="{{ url_for('static', filename='img/favicon.ico') }}">
     <title>{{ title }}</title>
+    {% block head_end %}{% endblock %}
 </head>
 <body>
-    <header class="page-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col">
-                    <div class="page-header-logo-and-name">
-                        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" class="page-header-logo">
-                        <div class="page-header-app-name">PyMessages</div>
+{% block body %}{% endblock %}
+<header class="page-header sticky-top">
+    <div class="container">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-auto">
+                <a class="page-header-logo-and-name" href="{{ url_for('main.index') }}">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}"
+                         alt="" class="page-header-logo rounded-circle">
+                    <span class="page-header-app-name">PyMessages</span>
+                </a>
+            </div>
+            <!-- TODO Заменить or на and -->
+            {% if not hide_user or current_user.is_authenticated %}
+            <div class="col-auto">
+                <div class="page-header-user d-flex align-items-center">
+                    <!-- TODO Вставить реальные данные и фото -->
+                    <span class="badge badge-pill badge-light mr-2">5</span>
+                    <div class="dropdown">
+                        <a class="page-header-user-first-name dropdown-toggle"
+                           href="#" role="button" id="pageHeaderUserDropdown"
+                           data-toggle="dropdown" aria-haspopup="true"
+                           aria-expanded="false">
+                            Ivan Ivanov
+                            {{ current_user.first_name }}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right"
+                             aria-labelledby="pageHeaderUserDropdown">
+                            <!-- TODO Вставить реальные ссылки -->
+                            <a class="dropdown-item" href="#">Редактировать
+                                профиль</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item"
+                               href="{{ url_for('main.logout') }}">Выйти</a>
+                        </div>
                     </div>
+                    <img src="static/img/logo.png" alt=""
+                         class="page-header-user-avatar rounded-circle">
+                    <!-- <img src="{{ current_user.avatar }}" alt=""-->
+                    <!--      class="page-header-user-avatar rounded-circle">-->
                 </div>
             </div>
+            {% endif %}
         </div>
-    </header>
-    <main class="page-main">
-        <div class="container">
-            {% block content %}{% endblock %}
-        </div>
-    </main>
-    <footer class="page-footer">
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <div class="page-footer-nav-block">
-                        <div class="page-footer-languages-wrapper">
-                            <!-- TODO Удалить или доделать
-                            Блок смены текста. Навряд ли успеем
-                            реализовать эту самую смену, так что позже лучше
-                            его закомментировать -->
-                            <ul class="page-footer-languages-list page-footer-links">
+    </div>
+</header>
+<main class="page-main">
+    {% block content %}{% endblock %}
+</main>
+<footer class="page-footer">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="page-footer-nav-block">
+                    <div class="page-footer-languages-wrapper">
+                        <!-- TODO Удалить или доделать
+                        Блок смены текста. Навряд ли успеем
+                        реализовать эту самую смену, так что позже лучше
+                        его закомментировать -->
+                        <ul class="page-footer-languages-list page-footer-links">
+                            <li class="page-footer-link-elem">
+                                <a href="#" class="page-footer-link">Русский</a>
+                            </li>
+                            <li class="page-footer-link-elem">
+                                <a href="#" class="page-footer-link">Тоже
+                                    русский</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <hr class="page-footer-languages-hr-links">
+                    <div class="page-footer-links-wrapper">
+                        <nav>
+                            <ul class="page-footer-nav-links-list page-footer-links">
+                                <!-- TODO Вставить реальные ссылки -->
+                                {% for title, link in
+                                constants.PAGE_NAV_LINKS.items() %}
                                 <li class="page-footer-link-elem">
-                                    <a href="#" class="page-footer-link">Русский</a>
+                                    <a href="{{ url_for(link) }}"
+                                       class="page-footer-link">{{ title }}</a>
                                 </li>
-                                <li class="page-footer-link-elem">
-                                    <a href="#" class="page-footer-link">Тоже русский</a>
-                                </li>
+                                {% endfor %}
                             </ul>
-                        </div>
-                        <hr class="page-footer-languages-hr-links">
-                        <div class="page-footer-links-wrapper">
-                            <nav>
-                                <ul class="page-footer-nav-links-list page-footer-links">
-                                    <!-- TODO Вставить реальные ссылки -->
-                                    {% for title, link in constants.PAGE_NAV_LINKS.items() %}
-                                    <li class="page-footer-link-elem">
-                                        <a href="{{ url_for(link) }}" class="page-footer-link">{{ title }}</a>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </nav>
-                        </div>
+                        </nav>
                     </div>
-                    <div class="page-footer-app-name">
-                            PyMessages, 2020
-                        </div>
+                </div>
+                <div class="page-footer-app-name">
+                    PyMessages, 2020
                 </div>
             </div>
         </div>
-    </footer>
+    </div>
+</footer>
+{% block body_end %}{% endblock %}
 </body>
 </html>

@@ -6,7 +6,7 @@ import urllib.parse
 
 import flask
 from flask import Blueprint, render_template, redirect, url_for, abort
-from flask_login import current_user
+from flask_login import current_user, login_required, logout_user
 from flask_mail import Message
 
 from app.email_utils import send_msg_in_thread
@@ -20,27 +20,39 @@ blueprint = Blueprint('main', __name__)
 @blueprint.route('/index', methods=['POST', 'GET'])
 @blueprint.route('/', methods=['POST', 'GET'])
 def index():
-    # TODO Заглушка. Может только отображать форму входа.
-    if not current_user.is_authenticated:
+    if not current_user.is_authenticated and False:
         return login()
-    return 'TODO'
+    param = {
+        'title': 'PyMessages'
+    }
+    return render_template('index.jinja2', **param)
 
 
 @blueprint.route('/login', methods=['POST', 'GET'])
 def login():
+    current_user.id = 1
     form = LoginForm()
     if form.validate_on_submit():
         # TODO Добавить аутентификацию пользователя
         return redirect(url_for('main.index'))
     param = {
         'title': 'Войти в PyMessages',
-        'form': form
+        'form': form,
     }
     return render_template('login.jinja2', **param)
 
 
+@blueprint.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
+
+
 @blueprint.route('/register', methods=['POST', 'GET'])
 def register():
+    if current_user.is_authenticated:
+        return redirect('/')
     form = RegisterForm()
     if form.validate_on_submit():
         # TODO Добавить внесение данных пользователя в БД
@@ -75,13 +87,15 @@ def register():
         return redirect(url_for('main.verify_email', token=''))
     param = {
         'title': 'Регистрация в PyMessages',
-        'form': form
+        'form': form,
     }
     return render_template('register.jinja2', **param)
 
 
 @blueprint.route('/verify_email/')
 def verify_email_message():
+    if current_user.is_authenticated:
+        return redirect('/')
     # Если пользователь только что создал аккаунт и указал рабочую почту, то
     # просим его перейти в почтовый ящик и подтвердить почту
     email = flask.session.get('email')
@@ -99,17 +113,19 @@ def verify_email_message():
         return
     param = {
         'title': 'Подтвердите email - PyMessages',
-        'email_server': email_server
+        'email_server': email_server,
     }
     return render_template('verify_email.jinja2', **param)
 
 
 @blueprint.route('/verify_email/<string:token>')
 def verify_email(token):
+    if current_user.is_authenticated:
+        return redirect('/')
     if token == token:  # TODO Добавить получение и проверку токена из БД
         # TODO Добавить подтверждение пользователя
         param = {
-            'title': 'Email подтверждён - PyMessages'
+            'title': 'Email подтверждён - PyMessages',
         }
         return render_template('email_verified.jinja2', **param)
     abort(403)
