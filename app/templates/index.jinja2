@@ -104,7 +104,7 @@
                 {% for _ in range(20) %}
                 <div class="index-user-message index-chat-message balloon-right">
                     Hello World many many many many many many many many many
-                    many many times<br>
+                    many many times {{ loop.index }}<br>
                     Hello<br>
                     World!
                 </div>
@@ -116,7 +116,7 @@
             <div class="index-input-message-block fixed-bottom position-absolute"
                  id="indexMessageBlock">
 
-                <div class="index-stickers-block" id="inputStickerBlock">
+                <div class="index-stickers-block d-none" id="indexStickersBlock">
                     <small class="font-weight-bold text-secondary position-absolute">Стикеры</small>
                     <ul class="index-stickers-list d-flex">
                         {% for i in range(20) %}

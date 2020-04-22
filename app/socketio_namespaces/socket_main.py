@@ -2,24 +2,25 @@ from flask_socketio import join_room, leave_room, send, Namespace, emit
 
 
 class MainNamespace(Namespace):
-    @staticmethod
-    def on_connect():
-        join_room('test')
-        print('connect!')
-        pass
-
-    @staticmethod
-    def on_disconnect():
-        pass
-
-    @staticmethod
-    def on_my_event(data):
-        print('hi')
-        emit('my_response', data)
-
-    @staticmethod
-    def on_my_response(data):
-        print('my_response', data)
+    pass
+    # @staticmethod
+    # def on_connect():
+    #     join_room('test')
+    #     print('connect!')
+    #     pass
+    #
+    # @staticmethod
+    # def on_disconnect():
+    #     pass
+    #
+    # @staticmethod
+    # def on_my_event(data):
+    #     print('hi')
+    #     emit('my_response', data)
+    #
+    # @staticmethod
+    # def on_my_response(data):
+    #     print('my_response', data)
 #
 #
 # @socketio.on('my_event', namespace='/')

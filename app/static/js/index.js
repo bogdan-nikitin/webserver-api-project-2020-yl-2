@@ -102,14 +102,27 @@ new ResizeSensor($('#indexMessageBlock'), function() {
         'height',
         `calc(100% - ${messagesHeaderHeight} - ${curInputHeight})`
     );
-    let messagesListElem = $('#indexCurrentChatMessagesList')
-    console.log(prevInputHeight - curInputHeight);
-    messagesListElem.scrollTop(prevInputHeight - curInputHeight);
+    // Скроллим сообщения вверх при показе списка стикеров, чтобы сообщения
+    // сохраняли свои позиции
+    let messagesListElem = $('#indexCurrentChatMessagesList');
+    if (messagesListElem[0].scrollHeight - messagesListElem.scrollTop() ==
+            messagesListElem[0].clientHeight){
+        // Из-за бага, либо моего недопонимания JS и JQuery, во время закрытия
+        // окна со стикерами, при проскроленных до самого низа сообщениях,
+        // сообщения не прокручиваются вниз. Для исправления этого
+        // недоразумения я полностью проскроливаю сообщения вручную
+        messagesListElem.scrollTop(messagesListElem[0].scrollHeight);
+        return;
+    }
+    let scrollDistance = parseInt(curInputHeight) - (parseInt(prevInputHeight));
+    console.log(scrollDistance, messagesListElem.scrollTop(), messagesListElem[0].scrollHeight);
+    messagesListElem.scrollTop(messagesListElem.scrollTop() + scrollDistance);
+    console.log(messagesListElem.scrollTop());
 });
 
 $('#indexChatBackBtn').on('click', switchChat);
 
-let stickerBlock = $('#inputStickerBlock')
+let stickerBlock = $('#indexStickersBlock')
 $('#indexAttachStickerBtn').on('click', () => switchDisplay(stickerBlock));
 
 })
