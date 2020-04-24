@@ -59,4 +59,16 @@ USER_DATA_PATH = os.path.join(ROOT_DIR, 'user_data')
 DB_PATH = os.path.join(USER_DATA_PATH, 'db/messenger.sqlite3')
 UPLOAD_PATH = os.path.join(USER_DATA_PATH, 'upload')
 
-ALLOWED_USER_AVATAR_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_PHOTO_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_VIDEO_EXTENSIONS = {'mp4'}
+ALLOWED_AUDIO_EXTENSIONS = {'mp3'}
+
+ALLOWED_PHOTO_EXTENSIONS_HTML = ','.join({
+    f'image/{ext}' for ext in ALLOWED_PHOTO_EXTENSIONS
+})
+ALLOWED_VIDEO_EXTENSIONS_HTML = ','.join({
+    f'video/{ext}' for ext in ALLOWED_VIDEO_EXTENSIONS
+})
+ALLOWED_AUDIO_EXTENSIONS_HTML = ','.join({
+    f'audio/{ext}' for ext in ALLOWED_AUDIO_EXTENSIONS
+})

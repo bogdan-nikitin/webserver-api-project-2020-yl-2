@@ -1,10 +1,13 @@
 """Модуль, отвечающий за создание различных частей приложения, которые будут
 прикреплены к нему на этапе инициализации"""
 
+import functools
 
+from flask_login import current_user
 from flask_login.login_manager import LoginManager
 from flask_mail import Mail
 from flask_socketio import SocketIO
+from flask_socketio import disconnect
 
 login_manager = LoginManager()
 mail = Mail()
@@ -15,6 +18,17 @@ socketio = SocketIO()
 def load_user(user_id):
     # TODO Заглушка. Переделать
     return
+
+
+def authenticated_only(f):
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        if not current_user.is_authenticated:
+            disconnect()
+        else:
+            return f(*args, **kwargs)
+
+    return wrapped
 
 # @login_manager.request_loader
 # def load_user_from_request(request):
