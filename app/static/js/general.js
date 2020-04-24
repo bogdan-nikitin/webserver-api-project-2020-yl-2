@@ -141,3 +141,9 @@ function switchDisplay(selector){
         elem.style('display', 'none', 'important');
     }
 }
+
+function forEach(sequence, func){
+    for (let i = 0;i < sequence.length; i++){
+        func(sequence[i], i, sequence);
+    }
+}

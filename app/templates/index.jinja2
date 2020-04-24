@@ -13,19 +13,54 @@
 <script src="{{ url_for('static', filename='js/general.js') }}"></script>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 <script>
-    /*var messageHTML = '<a class="list-group-item rounded-0 list-group-item-action active d-flex justify-content-between align-items-center"\n\
-                           id="list-home-list" data-toggle="list"\n\
-                           href="#" role="tab">\n\
-                            {0}\n\
-                            <span class="badge badge-primary badge-pill">\n\
-                            {1}\n\
-                            </span>\n\
-                        </a>'
-    console.log(messageHTML);*/
+    var messageHTML = ``;
+    var photoAdditionHTML = `
+        <a href="#" data-file-name="{0}" data-last-modified="{1}"
+           class="index-photo-addition-item text-white d-inline-flex justify-content-center align-items-center position-relative">
+            <img src="{2}" class="index-photo-addition">
+            <i class="fas fa-times position-absolute index-photo-remove-btn"></i>
+        </a>
+    `;
+    var additionHTML = `
+        <a type="button" data-file-name="{0}" data-last-modified="{1}"
+           class="btn btn-secondary btn-block d-flex justify-content-between"
+           href="#">
+            <span class="index-addition-file-name">
+                {0}
+            </span>
+            <div class="index-addition-remove-btn bg-white rounded">
+                <i class="fas fa-times text-secondary"></i>
+            </div>
+        </a>
+    `;
+
+
 </script>
 {% endblock %}
 
 {% block content %}
+<!-- Модальное окно с просьбой ожидания конца загрузки. На данный момент не
+используется, т.к. при попытке его закрыть динамически, сделать этого не
+удаётся -->
+<div class="modal fade" id="indexAdditionLoadingModal" tabindex="-1"
+     role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true"
+     data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content p-5">
+            <div class="modal-body">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Загрузка...</span>
+                    </div>
+                </div>
+                <div class="text-center">
+                    Пожалуйста, дождитесь загрузки файлов...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container overflow-hidden">
     <div class="row index-messages-block no-gutters">
         <!-- Раздел с поиском и списком чатов -->
@@ -116,7 +151,8 @@
             <div class="index-input-message-block fixed-bottom position-absolute"
                  id="indexMessageBlock">
 
-                <div class="index-stickers-block d-none" id="indexStickersBlock">
+                <div class="index-stickers-block d-none"
+                     id="indexStickersBlock">
                     <small class="font-weight-bold text-secondary position-absolute">Стикеры</small>
                     <ul class="index-stickers-list d-flex">
                         {% for i in range(20) %}
@@ -157,27 +193,60 @@
                             <!-- Возможно, это было бы лучше сделать циклом  -->
 
                             <a class="dropdown-item" href="#">
+                                <input type="file" id="indexAudioAddition"
+                                       class="index-addition-field"
+                                       multiple title=""
+                                       name="indexAudioAddition"
+                                       data-base-id="indexAudioAddition"
+                                       accept="{{ constants.ALLOWED_AUDIO_EXTENSIONS_HTML }}">
                                 <i class="fas fa-music index-addition-icon mr-1"></i>
                                 Аудио
                             </a>
                             <a class="dropdown-item" href="#">
+                                <input type="file" id="indexFileAddition"
+                                       class="index-addition-field"
+                                       multiple title=""
+                                       name="indexFileAddition"
+                                       data-base-id="indexFileAddition">
                                 <i class="fas fa-file index-addition-icon mr-1"></i>
                                 Файл
                             </a>
                             <a class="dropdown-item" href="#">
+                                <input type="file" id="indexVideoAddition"
+                                       class="index-addition-field"
+                                       multiple title=""
+                                       name="indexVideoAddition"
+                                       data-base-id="indexVideoAddition"
+                                       accept="{{ constants.ALLOWED_VIDEO_EXTENSIONS_HTML }}">
                                 <i class="fas fa-film index-addition-icon mr-1"></i>
                                 Видео
                             </a>
                             <a class="dropdown-item" href="#">
+                                <input type="file" id="indexPhotoAddition"
+                                       class="index-addition-field"
+                                       multiple title=""
+                                       name="indexPhotoAddition"
+                                       accept="{{ constants.ALLOWED_PHOTO_EXTENSIONS_HTML }}"
+                                       data-base-id="indexPhotoAddition">
                                 <i class="far fa-image index-addition-icon mr-1"></i>
                                 Фотография
                             </a>
                         </div>
                     </div>
                 </div>
-
+                <div class="index-additions-block" id="indexAdditionsBlock">
+                    <!-- Эти два элемента должны быть полностью пустыми (они не
+                    должны содержать даже пробелов или переносов строк), иначе
+                    блок с приложениями будет отображаться, даже если к
+                    сообщению ничего не прикрепили. -->
+                    <div class="index-additions-photo-list"
+                         id="indexAdditionsPhotoList"></div>
+                    <div class="index-additions-list"
+                         id="indexAdditionsList"></div>
+                </div>
 
             </div>
+
         </div>
     </div>
 </div>
