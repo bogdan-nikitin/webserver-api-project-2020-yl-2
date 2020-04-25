@@ -4,13 +4,15 @@
 import logging
 import os
 import re
+
 from flask import Flask
+from flask_restful import Api
 
-
-from app.blueprints import main, uploads
+from app.api import auth
 from app.data import db_session
 from app.setup_app import *
 from app.socketio_namespaces import socket_index, socket_main
+from app.views import main, uploads
 from modules import constants
 
 
@@ -20,8 +22,6 @@ def translate_wtforms_error(error_text):
     текст."""
     translation = constants.WTFORMS_ERRORS_TRANSLATION.get(
         error_text, error_text)
-    if translation is None:
-        logging.warning(f'No translation for wtforms error: {error_text}.')
     return translation
 
 
@@ -63,6 +63,7 @@ def create_app() -> Flask:
     mail.app = app
     mail.init_app(app)
     socketio.init_app(app)
+    api_ = Api(app)
 
     # Настройка частей приложения
     login_manager.login_view = 'main.login'
@@ -75,9 +76,13 @@ def create_app() -> Flask:
     app.register_blueprint(main.blueprint)
     app.register_blueprint(uploads.blueprint)
 
+    # Регистрация API
+    api_.add_resource(auth.AuthResource, '/api/v1/auth')
+
     # Настройки окружения Jinja2
     app.jinja_env.add_extension('jinja2.ext.do')
     app.jinja_env.globals['print'] = print
+    app.jinja_env.globals['bool'] = bool
     app.jinja_env.globals[
         'translate_wtforms_error'] = translate_wtforms_error
     app.jinja_env.globals['re'] = re

@@ -1,4 +1,5 @@
 """Модуль содержит большинство констант."""
+import datetime
 import os
 
 # Выделил родительскую директорию в отдельную переменную, дабы при перемещении
@@ -10,17 +11,16 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__),
 
 LOGGING_CONFIG_FILE = os.path.join(ROOT_DIR, 'logging.ini')
 
-# Перевод ошибок wtforms
+# # Перевод ошибок wtforms
 WTFORMS_ERRORS_TRANSLATION = {
-    'This field is required.': 'Это поле необходимо заполнить',
-    'Invalid email address.': 'Неверный адрес электронной почты'
+    'Not a valid integer value': 'Указано не число'
 }
-WTFORMS_FIELD_MUST_BE_EQUAL_ERROR = r'Field must be equal to (.+)\.'
 
 PAGE_NAV_LINKS = {
     'Главная': 'main.index',
     'Вход': 'main.login',
-    'Регистарция': 'main.register'
+    'Регистарция': 'main.register',
+    'Профиль': 'main.profile'
 }
 
 MAIL_DOMAINS_URLS = {
@@ -72,3 +72,5 @@ ALLOWED_VIDEO_EXTENSIONS_HTML = ','.join({
 ALLOWED_AUDIO_EXTENSIONS_HTML = ','.join({
     f'audio/{ext}' for ext in ALLOWED_AUDIO_EXTENSIONS
 })
+
+JWT_LIVE_TIME = datetime.timedelta(days=1)
