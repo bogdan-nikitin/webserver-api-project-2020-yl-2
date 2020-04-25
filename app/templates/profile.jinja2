@@ -7,6 +7,7 @@
 <script>
     $(function(){ window.location.hash = "{{ jump_to }}"; });
 
+
 </script>
 {% endif %}
 {% endblock %}
@@ -25,6 +26,12 @@
                         <div class="card-body">
                             <form action="" method="post" novalidate>
                                 {{ info_form.hidden_tag() }}
+                                <div class="form-group mb-3">
+                                    <label for="userID">ID</label>
+                                    <input class="form-control" id="userID"
+                                           readonly type="text"
+                                           value="{{ current_user.get_id() }}">
+                                </div>
                                 {% for field in [info_form.first_name,
                                 info_form.second_name,
                                 info_form.phone_number,
