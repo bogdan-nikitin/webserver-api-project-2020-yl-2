@@ -16,13 +16,14 @@ $py_green: #008B3C;
 $index_messages_header_height: 60px;
 // Расстояние от края сообщения до края чата на index.jinja2
 $index_distance_from_edge_to_msg: 20px;
-// Верхний отступ у .index-messages-block
-$index_messages_block_mt: 30px;
 
 $index_additions_padding: 20px;
 $index_additions_photo_height: 256px;
 
 $index_photo_addition_item_mb: 10px;
+
+$app_window_mt: 50px;
+$app_window_mb: 30px;
 
 
 
@@ -84,6 +85,10 @@ $index_photo_addition_item_mb: 10px;
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
     border-left: 10px solid #fff;
+}
+.app-window{
+    margin-top: $app_window_mt;
+    margin-bottom: $app_window_mb;
 }
 
 
@@ -241,10 +246,8 @@ $index_photo_addition_item_mb: 10px;
 
 .index-messages-block{
     background-color: white;
-    margin-bottom: 50px;
-    margin-top: $index_messages_block_mt;
     height: calc(
-        100vh - #{$index_messages_header_height} - #{$index_messages_block_mt}
+        100vh - #{$index_messages_header_height} - #{$app_window_mt}
     );
 }
 .index-chats-block{
@@ -418,4 +421,17 @@ $index_photo_addition_item_mb: 10px;
 }
 .index-addition-remove-btn{
     width: 1.5rem;
+}
+
+
+
+/* profile.jinja2 */
+
+.profile-avatar-img{
+    $side_size: 120px;
+    width: $side_size;
+    height: $side_size;
+}
+.profile-form-card:not(:first-child){
+    margin-top: 60px;
 }

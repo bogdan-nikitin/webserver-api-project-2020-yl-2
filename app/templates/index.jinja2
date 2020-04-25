@@ -14,27 +14,8 @@
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 <script>
     var messageHTML = ``;
-    var photoAdditionHTML = `
-        <a href="#" data-file-name="{0}" data-last-modified="{1}"
-           class="index-photo-addition-item text-white d-inline-flex justify-content-center align-items-center position-relative">
-            <img src="{2}" class="index-photo-addition">
-            <i class="fas fa-times position-absolute index-photo-remove-btn"></i>
-        </a>
-    `;
-    var additionHTML = `
-        <a type="button" data-file-name="{0}" data-last-modified="{1}"
-           class="btn btn-secondary btn-block d-flex justify-content-between"
-           href="#">
-            <span class="index-addition-file-name">
-                {0}
-            </span>
-            <div class="index-addition-remove-btn bg-white rounded">
-                <i class="fas fa-times text-secondary"></i>
-            </div>
-        </a>
-    `;
-
-
+    var photoAdditionHTML = `{% include "index_photo_addition.jinja2" %}`;
+    var additionHTML = `{% include "index_addition.jinja2" %}`;
 </script>
 {% endblock %}
 
@@ -62,7 +43,7 @@
     </div>
 </div>
 <div class="container overflow-hidden">
-    <div class="row index-messages-block no-gutters">
+    <div class="row index-messages-block app-window no-gutters">
         <!-- Раздел с поиском и списком чатов -->
         <div class="col-lg-3 col-12 index-chats-block h-100 d-lg-block"
              id="indexChatsBlock">

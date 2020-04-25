@@ -9948,6 +9948,11 @@ h3 {
   border-left: 10px solid #fff;
 }
 
+.app-window {
+  margin-top: 50px;
+  margin-bottom: 30px;
+}
+
 /* base.jinja2 */
 .page-header-logo {
   width: 35px;
@@ -10104,9 +10109,7 @@ h3 {
 /* index.jinja2 */
 .index-messages-block {
   background-color: white;
-  margin-bottom: 50px;
-  margin-top: 30px;
-  height: calc( 100vh - 60px - 30px );
+  height: calc( 100vh - 60px - 50px );
 }
 
 .index-chats-block {
@@ -10299,6 +10302,16 @@ h3 {
 
 .index-addition-remove-btn {
   width: 1.5rem;
+}
+
+/* profile.jinja2 */
+.profile-avatar-img {
+  width: 120px;
+  height: 120px;
+}
+
+.profile-form-card:not(:first-child) {
+  margin-top: 60px;
 }
 
 /*# sourceMappingURL=style.css.map */
