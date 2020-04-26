@@ -247,7 +247,7 @@ $app_window_mb: 30px;
 .index-messages-block{
     background-color: white;
     height: calc(
-        100vh - #{$index_messages_header_height} - #{$app_window_mt}
+        98vh - #{$index_messages_header_height} - #{$app_window_mt}
     );
 }
 .index-chats-block{
@@ -432,6 +432,12 @@ $app_window_mb: 30px;
     width: $side_size;
     height: $side_size;
 }
-.profile-form-card:not(:first-child){
-    margin-top: 60px;
+
+
+/* friends.jinja2 */
+
+.friends-friend-avatar{
+    $side_size: 60px;
+    width: $side_size;
+    height: $side_size;
 }

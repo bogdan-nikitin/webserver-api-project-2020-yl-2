@@ -10109,7 +10109,7 @@ h3 {
 /* index.jinja2 */
 .index-messages-block {
   background-color: white;
-  height: calc( 100vh - 60px - 50px );
+  height: calc( 98vh - 60px - 50px );
 }
 
 .index-chats-block {
@@ -10310,8 +10310,10 @@ h3 {
   height: 120px;
 }
 
-.profile-form-card:not(:first-child) {
-  margin-top: 60px;
+/* friends.jinja2 */
+.friends-friend-avatar {
+  width: 60px;
+  height: 60px;
 }
 
 /*# sourceMappingURL=style.css.map */

@@ -90,11 +90,11 @@ function appendAddition(){
                     reader.onload = function(e) {
 //                        console.log(e.target.result);
 //                        console.log(e);
-                        let photo = $(photoAdditionHTML.format(
-                            file.name,
-                            file.lastModified,
-                            e.target.result
-                        ));
+                        let photo = $(photoAdditionHTML.format({
+                            file_name: file.name,
+                            last_modified: file.lastModified,
+                            src: e.target.result
+                        }));
                         $('#indexAdditionsPhotoList').append(photo);
                 //        $('img').attr('src', e.target.result);
 //                        if (i == (arr.length - 1)){
@@ -105,8 +105,10 @@ function appendAddition(){
                     reader.readAsDataURL(file);
                 }
                 else{
-                    let addition = $(additionHTML.format(file.name,
-                                                         file.lastModified));
+                    let addition = $(additionHTML.format({
+                        file_name: file.name,
+                        last_modified: file.lastModified
+                    }));
                     $('#indexAdditionsList').append(addition);
                     addition.click(removeAddition);
                 }
