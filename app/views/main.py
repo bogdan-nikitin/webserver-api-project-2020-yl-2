@@ -148,7 +148,7 @@ def profile():
             'security_form': security_form,
             'info_error_msg': None,
             'info_success_msg': 'Данные успешно изменены',
-            'jump_to': 'infoCard'
+            'current_tab': '#profileInfoTab'
         }
         return render_template('profile.jinja2', **param)
     elif security_form.validate_on_submit():
@@ -159,7 +159,7 @@ def profile():
             'security_form': security_form,
             'security_error_msg': None,
             'security_success_msg': 'Данные успешно изменены',
-            'jump_to': 'securityCard'
+            'current_tab': '#profileSecurityTab'
         }
         return render_template('profile.jinja2', **param)
 
@@ -169,3 +169,13 @@ def profile():
         'security_form': security_form
     }
     return render_template('profile.jinja2', **param)
+
+
+@blueprint.route('/friends')
+# TODO Добавить login_required
+def friends():
+    param = {
+        'title': 'Друзья - PyMessages',
+        # '': ''
+    }
+    return render_template('friends.jinja2', **param)

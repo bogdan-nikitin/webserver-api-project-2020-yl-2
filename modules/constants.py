@@ -20,7 +20,9 @@ PAGE_NAV_LINKS = {
     'Главная': 'main.index',
     'Вход': 'main.login',
     'Регистарция': 'main.register',
-    'Профиль': 'main.profile'
+    'Профиль': 'main.profile',
+    'Друзья': 'main.friends',
+    'Выйти': 'main.logout'
 }
 
 MAIL_DOMAINS_URLS = {

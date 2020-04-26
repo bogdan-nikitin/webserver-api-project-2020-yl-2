@@ -72,11 +72,16 @@
 String.prototype.replaceAll = function (find, replace) {
     return this.replace(new RegExp(find, 'g'), replace);
 }
-String.prototype.format = function(){
-	var args = arguments;
-	return this.replace(/\{(\d+)\}/g, function(m,n){
-		return args[n] ? args[n] : m;
-	});
+
+let formatTemplate = /(?<=^|[^/]){(.*?)(?<=[^/])}/g;
+let escapedBracket = /\/([{}])/g;
+
+String.prototype.format = function() {
+  data = arguments[arguments.length - 1];
+  return this.replace(
+    formatTemplate, (entry, word) => arguments[word] || data[word] || entry)
+                                     .replace(escapedBracket,
+                                              (entry, word) => word);
 };
 
 var scrollEvents = ['wheel', 'mousewheel']

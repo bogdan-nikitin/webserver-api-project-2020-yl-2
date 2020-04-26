@@ -3,7 +3,7 @@
 import phonenumbers
 from flask_wtf import FlaskForm
 from wtforms import (StringField, PasswordField, BooleanField, SubmitField,
-                     IntegerField, FileField)
+                     IntegerField, FileField, TextAreaField)
 from wtforms.validators import (DataRequired, Email, EqualTo, ValidationError,
                                 NumberRange, Optional)
 
@@ -68,7 +68,7 @@ class ChangeProfileInfoForm(FlaskForm):
                                NumberRange(1, message=SPECIFY_VALID_AGE)]
     )
     city = named_field(StringField)('Город')
-    additional_inf = named_field(StringField)('Дополнительная информация')
+    additional_inf = named_field(TextAreaField)('Дополнительная информация')
     avatar = named_field(FileField)('Аватар')
 
     submit = SubmitField('Сохранить изменения')

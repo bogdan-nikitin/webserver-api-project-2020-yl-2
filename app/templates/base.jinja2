@@ -28,7 +28,8 @@
     <div class="container">
         <div class="row align-items-center justify-content-between">
             <div class="col-auto">
-                <a class="page-header-logo-and-name" href="{{ url_for('main.index') }}">
+                <a class="page-header-logo-and-name"
+                   href="{{ url_for('main.index') }}">
                     <img src="{{ url_for('static', filename='img/logo.png') }}"
                          alt="" class="page-header-logo rounded-circle">
                     <span class="page-header-app-name">PyMessages</span>
@@ -50,8 +51,12 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right"
                              aria-labelledby="pageHeaderUserDropdown">
-                            <!-- TODO Вставить реальные ссылки -->
-                            <a class="dropdown-item" href="#">Редактировать
+                            <a class="dropdown-item"
+                               href="{{ url_for('main.index') }}">Чаты</a>
+                            <a class="dropdown-item"
+                               href="{{ url_for('main.friends') }}">Друзья</a>
+                            <a class="dropdown-item"
+                               href="{{ url_for('main.profile') }}">Редактировать
                                 профиль</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item"
