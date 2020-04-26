@@ -28,10 +28,15 @@ class UsersResource(Resource):
                       'phone_number', 'age', 'city', 'additional_inf',
                       'is_confirmed', 'api_key', 'avatar', 'created_date')
             )})
-        else:
+        if user in flask_login.current_user.friends:
             return jsonify({'user': user.to_dict(
-                only=('first_name', 'second_name', 'email')
+                only=('alternative_id', 'first_name', 'second_name',
+                      'phone_number', 'age', 'city', 'additional_inf',
+                      'is_confirmed', 'api_key', 'avatar', 'created_date')
             )})
+        return jsonify({'user': user.to_dict(
+            only=('first_name', 'second_name')
+        )})
 
     def put(self, user_id):
         abort_if_not_found(user_id)
