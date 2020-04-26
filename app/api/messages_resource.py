@@ -6,7 +6,7 @@ from app.data import db_session
 from app.data.users import Users
 from app.data.messages import Messages
 from app.data.chats import Chats
-from app.api.messages_args import parser
+from app.api.resource_arguments.messages_args import post_parser
 
 
 def abort_if_not_found(obj_id, obj_class):
@@ -27,7 +27,7 @@ def abort_if_user_not_found_by_alt_id(alt_id):
 class MessagesResource(Resource):
     @flask_login.login_required
     def post(self):
-        args = parser.parse_args()
+        args = post_parser.parse_args()
         session = db_session.create_session()
         message = Messages(
             sender_id=args['sender_id'],

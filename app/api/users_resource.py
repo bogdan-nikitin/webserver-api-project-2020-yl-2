@@ -4,7 +4,7 @@ from flask_restful import Resource, abort
 
 from app.data import db_session
 from app.data.users import Users
-from app.api.users_args import parser, parser_edit
+from app.api.resource_arguments.users_args import post_parser, put_parser
 
 
 def abort_if_not_found(user_id):
@@ -40,7 +40,7 @@ class UsersResource(Resource):
 
     def put(self, user_id):
         abort_if_not_found(user_id)
-        args = parser_edit.parse_args()
+        args = put_parser.parse_args()
         session = db_session.create_session()
         user = session.query(Users).get(user_id)
         user.first_name = args.get('first_name') or user.first_name
@@ -56,7 +56,7 @@ class UsersResource(Resource):
         return jsonify({'success': 'OK'})
 
     def post(self):
-        args = parser.parse_args()
+        args = post_parser.parse_args()
         session = db_session.create_session()
         if args['password'] != args['password_again']:
             return jsonify({'error': 'Passwords do not match'})

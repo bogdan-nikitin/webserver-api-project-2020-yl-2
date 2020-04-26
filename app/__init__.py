@@ -12,7 +12,8 @@ from app.setup_app import *
 from modules import constants
 
 from app.data import db_session
-from app.api import users_resource
+from app.api import users_resource, users_friends_resource, chats_resource, \
+    messages_resource
 
 
 def translate_wtforms_error(error_text):
@@ -37,6 +38,13 @@ def create_app() -> Flask:
     api = Api(app)
     api.add_resource(users_resource.UsersResource, '/api/users',
                      '/api/users/<int:user_id>')
+    api.add_resource(users_friends_resource.UsersFriendsResource,
+                     '/api/users_friends')
+    api.add_resource(chats_resource.ChatsResource, '/api/chats')
+    api.add_resource(messages_resource.MessagesResource, '/api/messages')
+    api.add_resource(messages_resource.MessagesListResource,
+                     '/api/messages/<int:alt_id>',
+                     '/api/messages/<int:alt_id>/<date>')
 
     # Конфигурация приложения
     app.config.from_object(constants.APP_CONFIG)
