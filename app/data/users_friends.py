@@ -13,4 +13,5 @@ class UsersFriends(SqlAlchemyBase):
     # id пользователя, которого добавляют в друзья
     invitee_id = sqlalchemy.Column(sqlalchemy.Integer,
                                    sqlalchemy.ForeignKey('users.id'))
-    is_accepted = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+    is_accepted = sqlalchemy.Column(sqlalchemy.Boolean, default=None)
+    is_refused = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
