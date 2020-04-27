@@ -1,4 +1,5 @@
 """Модуль содержит большинство констант."""
+import datetime
 import os
 
 # Выделил родительскую директорию в отдельную переменную, дабы при перемещении
@@ -7,21 +8,21 @@ import os
 __parent_dir = '..'
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                         __parent_dir))
+
 LOGGING_CONFIG_FILE = os.path.join(ROOT_DIR, 'logging.ini')
 
-APP_CONFIG = 'app.config.DevelopmentConfig'
-
-# Перевод ошибок wtforms
+# # Перевод ошибок wtforms
 WTFORMS_ERRORS_TRANSLATION = {
-    'This field is required.': 'Это поле необходимо заполнить',
-    'Invalid email address.': 'Неверный адрес электронной почты'
+    'Not a valid integer value': 'Указано не число'
 }
-WTFORMS_FIELD_MUST_BE_EQUAL_ERROR = r'Field must be equal to (.+)\.'
 
 PAGE_NAV_LINKS = {
     'Главная': 'main.index',
     'Вход': 'main.login',
-    'Регистарция': 'main.register'
+    'Регистарция': 'main.register',
+    'Профиль': 'main.profile',
+    'Друзья': 'main.friends',
+    'Выйти': 'main.logout'
 }
 
 MAIL_DOMAINS_URLS = {
@@ -53,6 +54,25 @@ MAIL_DOMAINS_URLS = {
     "mail.kz": "http://mail.kz/"
 }
 
-ADDITIVE_TYPES_TITLES = ['photo', 'video', 'audio', 'sticker', 'file']
+ADDITIVE_TYPES_TITLES = ('photo', 'video', 'audio', 'sticker', 'file')
 
-DB_PATH = os.path.join(ROOT_DIR, 'db/messenger.sqlite3')
+USER_DATA_PATH = os.path.join(ROOT_DIR, 'user_data')
+
+DB_PATH = os.path.join(USER_DATA_PATH, 'db/messenger.sqlite3')
+UPLOAD_PATH = os.path.join(USER_DATA_PATH, 'upload')
+
+ALLOWED_PHOTO_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_VIDEO_EXTENSIONS = {'mp4'}
+ALLOWED_AUDIO_EXTENSIONS = {'mp3'}
+
+ALLOWED_PHOTO_EXTENSIONS_HTML = ','.join({
+    f'image/{ext}' for ext in ALLOWED_PHOTO_EXTENSIONS
+})
+ALLOWED_VIDEO_EXTENSIONS_HTML = ','.join({
+    f'video/{ext}' for ext in ALLOWED_VIDEO_EXTENSIONS
+})
+ALLOWED_AUDIO_EXTENSIONS_HTML = ','.join({
+    f'audio/{ext}' for ext in ALLOWED_AUDIO_EXTENSIONS
+})
+
+JWT_LIVE_TIME = datetime.timedelta(days=1)

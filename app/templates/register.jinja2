@@ -1,71 +1,87 @@
 {% extends "base.jinja2" %}
 
+{% set hide_user = True %}
+
 {% block content %}
-<div class="row">
-    <div class="col">
-        <div class="register-form-wrapper white-plate">
-            <p class="register-form-header">Регистрация в PyMessages</p>
-            <form action="" method="post" novalidate>
-                {{ form.hidden_tag() }}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="register-form-wrapper white-plate">
+                <p class="register-form-header">Регистрация в PyMessages</p>
+                <form action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
 
-                <!-- Можно было бы сделать циклом, но если бы захотелось,
-                к примеру, два поля вставить в одну строку - пришлось бы всё переделывать -->
+                    <!-- Можно было бы сделать циклом, но если бы захотелось,
+                    к примеру, два поля вставить в одну строку - пришлось бы
+                    всё переделывать -->
 
-                <div class="form-group form-full-width-field">
-                    {% set field = form.first_name %}
-                    {{ field(class="form-control" + (" is-invalid" if field.errors else ""), placeholder=field.label_name) }}
-                    {% for error in field.errors %}
-                    <div class="invalid-feedback">
-                        {{ translate_wtforms_error(error) }}
+                    <div class="form-group w-100">
+                        {% set field = form.first_name %}
+                        {{ field(class="form-control" + (" is-invalid" if
+                        field.errors else ""), placeholder=field.label_name) }}
+                        {% for error in field.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
 
-                <div class="form-group form-full-width-field">
-                    {% set field = form.second_name %}
-                    {{ field(class="form-control" + (" is-invalid" if field.errors else ""), placeholder=field.label_name) }}
-                    {% for error in field.errors %}
-                    <div class="invalid-feedback">
-                        {{ translate_wtforms_error(error) }}
+                    <div class="form-group w-100">
+                        {% set field = form.second_name %}
+                        {{ field(class="form-control" + (" is-invalid" if
+                        field.errors else ""), placeholder=field.label_name) }}
+                        {% for error in field.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
 
-                <div class="form-group form-full-width-field">
-                    {% set field = form.email %}
-                    {{ field(class="form-control" + (" is-invalid" if field.errors else ""), placeholder=field.label_name) }}
-                    {% for error in field.errors %}
-                    <div class="invalid-feedback">
-                        {{ translate_wtforms_error(error) }}
+                    <div class="form-group w-100">
+                        {% set field = form.email %}
+                        {{ field(class="form-control" + (" is-invalid" if
+                        field.errors else ""), placeholder=field.label_name) }}
+                        {% for error in field.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
 
-                <div class="form-group form-full-width-field">
-                    {% set field = form.password %}
-                    {{ field(class="form-control" + (" is-invalid" if field.errors else ""), placeholder=field.label_name) }}
-                    {% for error in field.errors %}
-                    <div class="invalid-feedback">
-                        {{ translate_wtforms_error(error) }}
+                    <div class="form-group w-100">
+                        {% set field = form.password %}
+                        {{ field(class="form-control" + (" is-invalid" if
+                        field.errors else ""), placeholder=field.label_name) }}
+                        {% for error in field.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
 
-                <div class="form-group form-full-width-field">
-                    {% set field = form.repeat_password %}
-                    {{ field(class="form-control" + (" is-invalid" if field.errors else ""), placeholder=field.label_name) }}
-                    {% for error in field.errors %}
-                    <div class="invalid-feedback">
-                        {% if re.match(constants.WTFORMS_FIELD_MUST_BE_EQUAL_ERROR, error) %}
-                            Пароли не совпадают
-                        {% endif %}
+                    <div class="form-group w-100">
+                        {% set field = form.repeat_password %}
+                        {{ field(class="form-control" + (" is-invalid" if
+                        field.errors else ""), placeholder=field.label_name) }}
+                        {% for error in field.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
-
-                {{ form.submit(type="submit", class="btn green-btn register-form-sign-up-btn form-full-width-field", role="button") }}
-            </form>
+                    {% if error_msg %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error_msg }}
+                    </div>
+                    {% endif %}
+                    {{ form.submit(type="submit", class="btn green-btn
+                    register-form-sign-up-btn w-100",
+                    role="button")
+                    }}
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
