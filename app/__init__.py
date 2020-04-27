@@ -15,6 +15,10 @@ from app.socketio_namespaces import socket_index, socket_main
 from app.views import main, uploads
 from modules import constants
 
+from app.data import db_session
+from app.api import users_resource, users_friends_resource, chats_resource, \
+    messages_resource
+
 
 def translate_wtforms_error(error_text):
     """Функция переводит ошибки, генерируемые полями из модуля wtforms на
@@ -49,6 +53,17 @@ def create_app() -> Flask:
     :rtype: Flask
     """
     app = Flask(__name__)
+
+    api_ = Api(app)
+    api_.add_resource(users_resource.UsersResource, '/api/users',
+                      '/api/users/<int:user_id>')
+    api_.add_resource(users_friends_resource.UsersFriendsResource,
+                      '/api/users_friends')
+    api_.add_resource(chats_resource.ChatsResource, '/api/chats')
+    api_.add_resource(messages_resource.MessagesResource, '/api/messages')
+    api_.add_resource(messages_resource.MessagesListResource,
+                      '/api/messages/<int:alt_id>',
+                      '/api/messages/<int:alt_id>/<date>')
 
     # Конфигурация приложения
     app_config = os.environ.get('APP_CONFIG', 'app.config.DevelopmentConfig')
