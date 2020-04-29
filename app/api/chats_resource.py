@@ -75,6 +75,7 @@ class ChatsResource(Resource):
                 session.delete(message)
             session.delete(chat)
             session.commit()
+            return jsonify({'success': 'OK'})
         elif alt_id:
             abort_if_user_not_found_by_alt_id(alt_id)
             session = db_session.create_session()
@@ -88,4 +89,5 @@ class ChatsResource(Resource):
                      | (Chats.second_author_id == cur_user_id)))
             session.delete(chat)
             session.commit()
-        return jsonify({'success': 'OK'})
+            return jsonify({'success': 'OK'})
+        return jsonify({'error': 'Bad request'})
