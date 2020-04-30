@@ -12,7 +12,7 @@ from app.api import auth
 from app.data import db_session
 from app.setup_app import *
 from app.socketio_namespaces import socket_index, socket_main
-from app.views import main, uploads
+from app.views import main, uploads, docs
 from modules import constants
 
 from app.data import db_session
@@ -90,6 +90,7 @@ def create_app() -> Flask:
     # Регистрация чертежей
     app.register_blueprint(main.blueprint)
     app.register_blueprint(uploads.blueprint)
+    app.register_blueprint(docs.blueprint)
 
     # Регистрация API
     api_.add_resource(auth.AuthResource, '/api/v1/auth')
