@@ -53,7 +53,7 @@ class RegisterForm(FlaskForm):
         'Повторите пароль', validators=[
             EqualTo('password', PASSWORDS_DO_NOT_MATCH)]
     )
-    submit = SubmitField('Зарегестрироваться')
+    submit = SubmitField('Зарегистрироваться')
 
 
 class ChangeProfileInfoForm(FlaskForm):

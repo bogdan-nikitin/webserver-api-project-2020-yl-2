@@ -1,48 +1,43 @@
+import datetime
 import random
 import string
-import datetime
-import hashlib
 
 import sqlalchemy
-from flask import current_app
 from flask_login import UserMixin
 from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from app.data import db_session
+from app.data.db_session import SqlAlchemyBase
+from app.data.users_friends import UsersFriends
 
-from .db_session import SqlAlchemyBase
-from .users_friends import UsersFriends
 
-
-def create_alternative_id(size):
-    alt_ids = set()
-    session = db_session.create_session()
-    for user in session.query(Users).all:
-        alt_ids.add(user.alternative_id)
+def generate_alternative_id():
+    size = random.randint(10, 20)
     alt_id = ''.join(
-        random.choice(string.ascii_letters + string.digits + '_' * 13) for _ in
-        range(size))
-    while alt_id in alt_ids:
-        alt_id = ''.join(
-            random.choice(string.ascii_letters + string.digits + '_' * 13)
-            for _ in range(size))
+        random.choice(string.ascii_letters + string.digits + '_') for _ in
+        range(size)).lower()
     return alt_id
 
 
-def create_api_key(email, created_date, password):
-    secret_key = current_app.config['SECRET_KEY']
-    hash_object = hashlib.sha256(bytes(email + secret_key + str(created_date) +
-                                       password, encoding='utf-8'))
-    return hash_object.hexdigest()
+def create_alternative_id():
+    session = db_session.create_session()
+    alt_id = generate_alternative_id()
+    query = session.query(Users).exists().where(
+        Users.alternative_id == 123)
+    while session.query(query).scalar():
+        alt_id = generate_alternative_id()
+    return alt_id
 
 
-class Users(SqlAlchemyBase, UserMixin, SerializerMixin):
+class Users(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
-                           primary_key=True, autoincrement=True)
-    alternative_id = sqlalchemy.Column(sqlalchemy.String)
+                           primary_key=True, autoincrement=True,
+                           index=True)
+    alternative_id = sqlalchemy.Column(sqlalchemy.String, index=True)
     first_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     second_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     email = sqlalchemy.Column(sqlalchemy.String,
@@ -54,7 +49,6 @@ class Users(SqlAlchemyBase, UserMixin, SerializerMixin):
     additional_inf = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     is_confirmed = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    api_key = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     avatar = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
@@ -67,8 +61,7 @@ class Users(SqlAlchemyBase, UserMixin, SerializerMixin):
 
     def set_attributes(self, password):
         self.hashed_password = generate_password_hash(password)
-        self.api_key = create_api_key(self.email, self.created_date, password)
-        self.alternative_id = create_alternative_id(random.randint(10, 20))
+        self.alternative_id = create_alternative_id()
 
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)

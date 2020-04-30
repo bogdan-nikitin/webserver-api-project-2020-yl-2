@@ -137,10 +137,9 @@ function removeAddition(){
 
 // Следующий код выполнится после загрузки DOM
 $(document).ready(function (){
-
     freezeScroll('#indexCurrentChatMessagesList', '#indexChatsList');
 
-    $('.index-chats-chat-item').on('click', switchChat);
+    $('.index-chats-chat-item').click(switchChat);
 
     // TODO Сделать переключение вкладок
 //    $('a[data-toggle="list"]').on('show.bs.tab',

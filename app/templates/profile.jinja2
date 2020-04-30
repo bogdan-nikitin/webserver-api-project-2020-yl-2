@@ -7,6 +7,7 @@
 <script>
     $(function(){ $("{{ current_tab }}").tab('show'); });
 
+
 </script>
 {% endif %}
 {% endblock %}
@@ -50,7 +51,7 @@
                                         <label for="userID">ID</label>
                                         <input class="form-control" id="userID"
                                                readonly type="text"
-                                               value="{{ current_user.get_id() }}">
+                                               value="{{ current_user.user_id }}">
                                     </div>
                                     {% for field in [info_form.first_name,
                                     info_form.second_name,
@@ -177,7 +178,8 @@
                                         profile-security-field"
                                         + ("
                                         is-invalid" if field.errors else ""),
-                                        readonly=not bool(security_form.errors))
+                                        readonly=not bool(security_form.errors),
+                                        autocomplete="off")
                                         }}
                                         {% for error in field.errors %}
                                         <div class="invalid-feedback">
@@ -194,7 +196,8 @@
                                         profile-security-field"
                                         + ("
                                         is-invalid" if field.errors else ""),
-                                        readonly=not bool(security_form.errors))
+                                        readonly=not bool(security_form.errors),
+                                        autocomplete="off")
                                         }}
                                         {% for error in field.errors %}
                                         <div class="invalid-feedback">

@@ -16,6 +16,7 @@
     var messageHTML = ``;
     var photoAdditionHTML = `{% include "index_photo_addition.jinja2" %}`;
     var additionHTML = `{% include "index_addition.jinja2" %}`;
+
 </script>
 {% endblock %}
 
@@ -48,7 +49,8 @@
         <div class="col-lg-3 col-12 index-chats-block h-100 d-lg-block"
              id="indexChatsBlock">
             <div class="index-chats-search-block index-messages-header sticky-top d-flex align-items-center">
-                <form action="#" role="search" onsubmit="return false;">
+                <form action="#" role="search" onsubmit="return false;"
+                      class="w-100">
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <div class="input-group-text">

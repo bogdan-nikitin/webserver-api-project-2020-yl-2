@@ -32,11 +32,11 @@
                    href="{{ url_for('main.index') }}">
                     <img src="{{ url_for('static', filename='img/logo.png') }}"
                          alt="" class="page-header-logo rounded-circle">
-                    <span class="page-header-app-name">PyMessages</span>
+                    <span class="page-header-app-name d-md-block d-none">PyMessages</span>
                 </a>
             </div>
             <!-- TODO Заменить or на and -->
-            {% if not hide_user or current_user.is_authenticated %}
+            {% if not hide_user and current_user %}
             <div class="col-auto">
                 <div class="page-header-user d-flex align-items-center">
                     <!-- TODO Вставить реальные данные и фото -->
@@ -46,8 +46,8 @@
                            href="#" role="button" id="pageHeaderUserDropdown"
                            data-toggle="dropdown" aria-haspopup="true"
                            aria-expanded="false">
-                            Ivan Ivanov
                             {{ current_user.first_name }}
+                            {{ current_user.second_name }}
                         </a>
                         <div class="dropdown-menu dropdown-menu-right"
                              aria-labelledby="pageHeaderUserDropdown">

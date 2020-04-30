@@ -1,46 +1,48 @@
 """Модуль, отвечающий за создание различных частей приложения, которые будут
 прикреплены к нему на этапе инициализации"""
 
-import jwt
-from flask_login.login_manager import LoginManager
+import requests
+import urllib.parse
+from app.api_utils import UserAPIModel, refresh_user
+# import jwt
+# from flask_login.login_manager import LoginManager
 from flask_mail import Mail
 from flask_socketio import SocketIO
+from flask import redirect, url_for, request, make_response
+from modules import constants
+# from app.auth_utils import decode_auth_token
+# from app.data import db_session
+# from app.data.users import Users
+from flask_jwt_extended import (
+    JWTManager, set_access_cookies,
+)
+import logging
+from flask_wtf.csrf import CSRFProtect, generate_csrf
+# login_manager = LoginManager()
 
-from app.auth_utils import decode_auth_token
-from app.data import db_session
-from app.data.users import Users
 
-login_manager = LoginManager()
 mail = Mail()
 socketio = SocketIO()
+jwt = JWTManager()
+csrf = CSRFProtect()
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    session = db_session.create_session()
-    return session.query(Users).filter(Users.alternative_id == user_id).first()
+@jwt.unauthorized_loader
+def unauthorized_loader(msg):
+    return redirect(url_for('main.login'))
 
 
-@login_manager.request_loader
-def load_user_from_request(request):
-    """Загрузка пользователя через запрос"""
-    auth_headers = request.headers.get('Authorization', '').split()
-    if len(auth_headers) == 2 and auth_headers[0] == 'Bearer':
-        token = auth_headers[1]
-    elif request.json and 'access_token' in request.json:
-        token = request.json['access_token']
-    else:
-        # abort(
-        #     401,
-        #     'The access token not specified. Specify the token in the '
-        #     '"Authorization" header with the Bearer type, or pass it in the '
-        #     '"access_key" request parameter'
-        # )
-        return
+@jwt.user_loader_callback_loader
+def user_loader(identity):
+    return UserAPIModel(identity)
+
+
+@jwt.expired_token_loader
+def expired_token_loader(msg):
+    r = make_response(redirect(request.path))
     try:
-        data = decode_auth_token(token)
-    except jwt.exceptions.InvalidTokenError:
-        return
-    user_id = data['aud']
-    session = db_session.create_session()
-    return session.query(Users).filter(Users.alternative_id == user_id).first()
+        refresh_user(r)
+        return r
+    except Exception as e:
+        logging.warning(e)
+    return redirect(url_for('main.login'))

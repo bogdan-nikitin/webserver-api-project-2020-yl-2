@@ -5,14 +5,25 @@ from modules import constants
 
 
 class Config:
-    pass
+    JWT_TOKEN_LOCATION = ('cookies', 'json', 'query_string')
+    JWT_ERROR_MESSAGE_KEY = 'message'
+    WTF_CSRF_CHECK_DEFAULT = False
+    JWT_COOKIE_CSRF_PROTECT = False
+    JWT_SESSION_COOKIE = False
+    # Параметр отвечает за то, будут ли куки отправляться только по протоколу
+    # HTTPS. В данный момент у приложения нет сертификата, так что параметр
+    # равен False. Но при запуске приложения на прод, то крайне желательно
+    # поставить True, т.к. иначе злоумышленник сможет похитить ключ доступа
+    # JWT_COOKIE_SECURE = True
 
 
 class DevelopmentConfig(Config):
-    SECRET_KEY = 'py_messages_test_secret_key'
+    SECRET_KEY = JWT_SECRET_KEY = 'py_messages_test_secret_key'
+    JWT_ACCESS_TOKEN_EXPIRES = 60 * 2
     UPLOAD_FOLDER = constants.UPLOAD_PATH
     ENV = 'development'
     DEBUG = True
+
     # Для рассылки email, необходимо заполнить следующие поля:
     # MAIL_SERVER =
     # MAIL_PORT =
