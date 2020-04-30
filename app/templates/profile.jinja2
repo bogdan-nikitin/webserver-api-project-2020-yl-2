@@ -8,6 +8,7 @@
     $(function(){ $("{{ current_tab }}").tab('show'); });
 
 
+
 </script>
 {% endif %}
 {% endblock %}
@@ -134,7 +135,29 @@
                                 <!-- security_form -->
                                 <form action="" method="post" novalidate>
                                     {{ security_form.hidden_tag() }}
-                                    <div class="form-group mb-3">
+                                    <div class="form-group">
+                                        {% set field =
+                                        security_form.old_password %}
+                                        {{ field.label }}
+                                        {{ field(class="form-control
+                                        profile-security-field"
+                                        + ("
+                                        is-invalid" if field.errors else ""),
+                                        readonly=not bool(security_form.errors))
+                                        }}
+                                        <small id="{{ field.id }}Help"
+                                               class="form-text text-muted">
+                                            Чтобы поменять пароль или email,
+                                            необходимо ввести свой текущий
+                                            пароль
+                                        </small>
+                                        {% for error in field.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ translate_wtforms_error(error) }}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-group">
                                         {% set field = security_form.email %}
                                         {{ field.label }}
                                         {{ field(class="form-control
@@ -149,28 +172,7 @@
                                         </div>
                                         {% endfor %}
                                     </div>
-                                    <div class="form-group">
-                                        {% set field =
-                                        security_form.old_password %}
-                                        {{ field.label }}
-                                        {{ field(class="form-control
-                                        profile-security-field"
-                                        + ("
-                                        is-invalid" if field.errors else ""),
-                                        readonly=not bool(security_form.errors))
-                                        }}
-                                        <small id="{{ field.id }}Help"
-                                               class="form-text text-muted">
-                                            Введите это поле, только если вы
-                                            хотите
-                                            сменить пароль
-                                        </small>
-                                        {% for error in field.errors %}
-                                        <div class="invalid-feedback">
-                                            {{ translate_wtforms_error(error) }}
-                                        </div>
-                                        {% endfor %}
-                                    </div>
+
                                     <div class="form-group">
                                         {% set field = security_form.password %}
                                         {{ field.label }}

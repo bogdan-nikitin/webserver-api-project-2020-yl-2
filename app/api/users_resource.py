@@ -9,7 +9,6 @@ from app.data import db_session
 from app.data.users import Users
 from app.data.tokens import Tokens
 from app.auth_utils import create_email_token
-from app.setup_app import csrf
 
 
 def abort_if_not_found(user_id):
@@ -57,14 +56,31 @@ class UsersResource(Resource):
         )})
 
     @staticmethod
-    @jwt_optional
+    @jwt_required
     def put():
-        user_id = get_jwt_identity()
-        print(user_id)
         args = put_parser.parse_args()
+
+        user_id = get_jwt_identity()
         session = db_session.create_session()
         query = session.query(Users)
-        user = query.filter(Users.alternative_id == user_id).first()
+        user: Users = query.filter(Users.alternative_id == user_id).first()
+
+        old_password = args.old_password
+        email = args.email
+        password = args.password
+
+        if email or password:
+            if not old_password:
+                return jsonify(
+                    {'error': 'To change email or password you must specify '
+                              'your old password'}
+                )
+            elif not user.check_password(old_password):
+                return jsonify({'error': 'Bad password'})
+
+            user.email = email or user.email
+            user.set_attributes(password)
+
         user.first_name = args.get('first_name') or user.first_name
         user.second_name = args.get('second_name') or user.second_name
         if email := args.get('email'):

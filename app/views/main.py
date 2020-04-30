@@ -185,6 +185,7 @@ def verify_email(token):
 @blueprint.route('/profile', methods=['GET', 'POST'])
 @jwt_required
 def profile():
+    title = 'Профиль - PyMessages'
     info_form = ChangeProfileInfoForm(prefix='info')
     security_form = ChangeProfileSecurityForm(prefix='security')
     if info_form.validate_on_submit() and info_form.submit.data:
@@ -196,7 +197,7 @@ def profile():
         current_user.additional_inf = info_form.additional_inf.data
         current_user.commit()
         param = {
-            'title': 'Профиль - PyMessages',
+            'title': title,
             'info_form': info_form,
             'security_form': security_form,
             'info_error_msg': None,
@@ -205,16 +206,38 @@ def profile():
         }
         return render_template('profile.jinja2', **param)
     elif security_form.validate_on_submit() and security_form.submit.data:
-        # TODO Вставить данные в БД
-        param = {
-            'title': 'Профиль - PyMessages',
-            'info_form': info_form,
-            'security_form': security_form,
-            'security_error_msg': None,
-            'security_success_msg': 'Данные успешно изменены',
-            'current_tab': '#profileSecurityTab'
-        }
-        return render_template('profile.jinja2', **param)
+        if security_form.password.data != security_form.repeat_password.data:
+            param = {
+                'title': title,
+                'info_form': info_form,
+                'security_form': security_form,
+                'security_error_msg': 'Пароли не совпадают',
+                'security_success_msg': None,
+                'current_tab': '#profileSecurityTab'
+            }
+            return render_template('profile.jinja2', **param)
+        current_user.email = security_form.email.data
+        current_user.password = security_form.password.data
+        if current_user.commit(old_password=security_form.old_password.data):
+            param = {
+                'title': title,
+                'info_form': info_form,
+                'security_form': security_form,
+                'security_error_msg': None,
+                'security_success_msg': 'Данные успешно изменены',
+                'current_tab': '#profileSecurityTab'
+            }
+            return render_template('profile.jinja2', **param)
+        else:
+            param = {
+                'title': title,
+                'info_form': info_form,
+                'security_form': security_form,
+                'security_error_msg': 'Неверный пароль',
+                'security_success_msg': None,
+                'current_tab': '#profileSecurityTab'
+            }
+            return render_template('profile.jinja2', **param)
     info_form.first_name.data = current_user.first_name
     info_form.second_name.data = current_user.second_name
     info_form.phone_number.data = current_user.phone_number

@@ -136,10 +136,11 @@ class APIModel:
     def id(self):
         return self._id
 
-    def commit(self):
+    def commit(self, **additional_json):
         response = requests.put(self._url,
                                 json={**self._set_model_attrs,
-                                      'access_token': get_access_token()})
+                                      'access_token': get_access_token(),
+                                      **additional_json})
         if response:
             json_response = response.json()
             if 'success' in json_response:

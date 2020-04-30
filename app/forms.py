@@ -75,16 +75,15 @@ class ChangeProfileInfoForm(FlaskForm):
 
 
 class ChangeProfileSecurityForm(FlaskForm):
+    old_password = named_field(PasswordField)('Пароль',
+                                              validators=[Optional()])
     email = named_field(StringField)(
         'Email', validators=[Optional(), Email(SPECIFY_VALID_EMAIL)])
-    old_password = named_field(PasswordField)('Старый пароль',
-                                              validators=[Optional()])
     password = named_field(PasswordField)(
-        'Пароль', validators=[Optional(),
-                              DataRequired(FIELD_MUST_BE_FILLED_IN)])
+        'Новый пароль', validators=[Optional(),
+                                    DataRequired(FIELD_MUST_BE_FILLED_IN)])
     repeat_password = named_field(PasswordField)(
         'Повторите пароль', validators=[
             Optional(), EqualTo('password', PASSWORDS_DO_NOT_MATCH)]
     )
-
     submit = SubmitField('Сохранить изменения')
