@@ -4,11 +4,18 @@ from flask_jwt_extended import (
     verify_jwt_in_request, set_access_cookies, set_refresh_cookies
 )
 from flask_restful import Resource, abort
-from app.api.resource_arguments.users_args import post_parser, put_parser
+from app.api.resource_arguments.users_args import *
 from app.data import db_session
 from app.data.users import Users
 from app.data.tokens import Tokens
 from app.auth_utils import create_email_token
+
+
+USERS_PRIVATE_ONLY = (
+    'alternative_id', 'first_name', 'second_name', 'email',
+    'phone_number', 'age', 'city', 'additional_inf',
+    'is_confirmed', 'avatar', 'created_date')
+USERS_PUBLIC_ONLY = ('first_name', 'second_name', 'alternative_id')
 
 
 def abort_if_not_found(user_id):
@@ -26,6 +33,10 @@ def create_token(user, session=None):
     session.commit()
 
 
+def users_like(field, val):
+    return getattr(Users, field).like('%' + val + '%')
+
+
 class UsersResource(Resource):
     @staticmethod
     @jwt_optional
@@ -38,12 +49,7 @@ class UsersResource(Resource):
         query = session.query(Users)
         user = query.filter(Users.alternative_id == user_id).first()
         if current_user and user_id == current_user.user_id:
-            return jsonify({'user': user.to_dict(
-                only=(
-                    'alternative_id', 'first_name', 'second_name', 'email',
-                    'phone_number', 'age', 'city', 'additional_inf',
-                    'is_confirmed', 'avatar', 'created_date')
-            )})
+            return jsonify({'user': user.to_dict(only=USERS_PRIVATE_ONLY)})
         # TODO Переделать код ниже
         # if user in flask_login.current_user.friends:
         #     return jsonify({'user': user.to_dict(
@@ -51,9 +57,7 @@ class UsersResource(Resource):
         #               'phone_number', 'age', 'city', 'additional_inf',
         #               'is_confirmed', 'api_key', 'avatar', 'created_date')
         #     )})
-        return jsonify({'user': user.to_dict(
-            only=('first_name', 'second_name')
-        )})
+        return jsonify({'user': user.to_dict(only=USERS_PUBLIC_ONLY)})
 
     @staticmethod
     @jwt_required
@@ -116,3 +120,38 @@ class UsersResource(Resource):
         create_token(user, session=session)
         session.commit()
         return jsonify({'success': 'OK'})
+
+
+class UsersListResource(Resource):
+    @staticmethod
+    def get():
+        args = list_get_parser.parse_args()
+        if limit := args.get('limit'):
+            if limit > constants.USERS_LIST_RESOURCE_GET_COUNT:
+                return jsonify({
+                    'error': 'Maximum limit is {0}'
+                    .format(constants.USERS_LIST_RESOURCE_GET_COUNT)
+                })
+        else:
+            limit = constants.USERS_LIST_RESOURCE_GET_COUNT
+        fields = ['first_name', 'second_name', 'alternative_id']
+        session = db_session.create_session()
+        query = session.query(Users)
+        if search_request := args.search_request:
+            for word in search_request.split(' '):
+                req = users_like(fields[0], word)
+                for i in range(0, len(fields) - 1):
+                    req = req | users_like(fields[i + 1], word)
+                query = query.filter(req)
+        else:
+            field_names = {'user_id': 'alternative_id'}
+            for key in ['first_name', 'second_name', 'user_id']:
+                if val := args.get(key):
+                    field = field_names.get(key, key)
+                    query = query.filter(users_like(field, val))
+        start = args.start
+        users = query.all()[start:start + limit]
+        return jsonify({
+            'users': [user.to_dict(only=USERS_PUBLIC_ONLY) for user in users]
+        })
+

@@ -225,7 +225,6 @@ def profile():
         cur_email = email or current_user.email
         cur_password = password or old_password
         if current_user.commit(old_password=old_password):
-            # TODO Генерировать новый токен при смене данных
             param = {
                 'title': title,
                 'info_form': info_form,

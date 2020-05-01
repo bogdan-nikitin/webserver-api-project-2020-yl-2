@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.data import db_session
 from app.data.db_session import SqlAlchemyBase
 from app.data.users_friends import UsersFriends
+from functools import wraps
 
 
 def generate_alternative_id():
@@ -52,7 +53,6 @@ class Users(SqlAlchemyBase, SerializerMixin):
     avatar = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
-
     messages = orm.relation('Messages', backref='message_sender')
     chats = orm.relation('Chats', secondary='chat_participants',
                          backref='chat_member')
@@ -68,3 +68,11 @@ class Users(SqlAlchemyBase, SerializerMixin):
 
     def get_id(self):
         return self.alternative_id
+
+    @wraps(SerializerMixin.to_dict)
+    def to_dict(self, *args, **kwargs):
+        result = super().to_dict(*args, **kwargs)
+        if 'alternative_id' in result:
+            result['user_id'] = result['alternative_id']
+            del result['alternative_id']
+        return result

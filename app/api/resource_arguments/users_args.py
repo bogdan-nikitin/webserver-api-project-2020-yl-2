@@ -1,4 +1,5 @@
 from flask_restful import reqparse
+from modules import constants
 
 
 # get_parser = reqparse.RequestParser()
@@ -29,3 +30,11 @@ put_parser.add_argument('avatar')
 put_parser.add_argument('old_password')
 put_parser.add_argument('email')
 put_parser.add_argument('password')
+
+
+list_get_parser = reqparse.RequestParser()
+list_get_parser.add_argument('first_name')
+list_get_parser.add_argument('second_name')
+list_get_parser.add_argument('search_request')
+list_get_parser.add_argument('start', type=int, default=0)
+list_get_parser.add_argument('limit', type=int)

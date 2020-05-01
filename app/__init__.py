@@ -84,6 +84,7 @@ def create_app() -> Flask:
     # Регистрация API
     api_.add_resource(auth_resources.LoginResource, '/api/v1/login')
     api_.add_resource(auth_resources.RefreshResource, '/api/v1/refresh/')
+    api_.add_resource(users_resource.UsersListResource, '/api/v1/users')
     api_.add_resource(users_resource.UsersResource, '/api/v1/users/',
                       '/api/v1/users/<string:user_id>')
     api_.add_resource(users_friends_resource.UsersFriendsResource,
