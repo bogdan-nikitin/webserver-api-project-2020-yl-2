@@ -13,7 +13,7 @@ from app.data import db_session
 from app.setup_app import *
 from app.socketio_namespaces import socket_index, socket_main
 from app.views import main, uploads, docs
-from modules import constants
+from modules import constants, md_conversion
 
 from app.data import db_session
 from app.api import users_resource, users_friends_resource, chats_resource, \
@@ -103,6 +103,10 @@ def create_app() -> Flask:
         'translate_wtforms_error'] = translate_wtforms_error
     app.jinja_env.globals['re'] = re
     app.jinja_env.globals['constants'] = constants
+
+    # Генерация документации
+    md_conversion.markdown_to_html(constants.ROOT_DIR, 'app/docs/api_docs.md',
+                                   'app/docs/cached/api_docs.jinja2')
 
     # Инициализация БД
     db_session.global_init(constants.DB_PATH)
