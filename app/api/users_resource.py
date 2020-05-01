@@ -78,22 +78,21 @@ class UsersResource(Resource):
             elif not user.check_password(old_password):
                 return jsonify({'error': 'Bad password'})
 
-            user.email = email or user.email
-            user.set_attributes(password)
+            if email:
+                user.email = email
+                create_token(user, session=session)
+            if password:
+                user.set_attributes(password)
 
         user.first_name = args.get('first_name') or user.first_name
         user.second_name = args.get('second_name') or user.second_name
-        if email := args.get('email'):
-            user.email = email
-            create_token(user, session=session)
         user.phone_number = args.get('phone_number') or user.phone_number
         user.age = args.get('age') or user.age
         user.additional_inf = args.get('additional_inf') or user.additional_inf
         user.city = args.get('city') or user.city
         user.avatar = args.get('avatar') or user.avatar
-        session.add(user)
         session.commit()
-        return jsonify({'success': 'OK'})
+        return jsonify({'user_id': user.alternative_id})
 
     @staticmethod
     def post():

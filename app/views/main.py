@@ -9,7 +9,8 @@ import flask
 from flask import (Blueprint, render_template, redirect, url_for, abort,
                    make_response, current_app)
 from flask_jwt_extended import (
-    jwt_required, current_user, jwt_optional, verify_jwt_in_request, get_csrf_token
+    jwt_required, current_user, jwt_optional, verify_jwt_in_request,
+    get_csrf_token
 )
 from app.api_utils import get_access_token
 from flask_mail import Message
@@ -216,9 +217,15 @@ def profile():
                 'current_tab': '#profileSecurityTab'
             }
             return render_template('profile.jinja2', **param)
-        current_user.email = security_form.email.data
-        current_user.password = security_form.password.data
-        if current_user.commit(old_password=security_form.old_password.data):
+        email = security_form.email.data
+        password = security_form.password.data
+        old_password = security_form.old_password.data
+        current_user.email = email
+        current_user.password = password
+        cur_email = email or current_user.email
+        cur_password = password or old_password
+        if current_user.commit(old_password=old_password):
+            # TODO Генерировать новый токен при смене данных
             param = {
                 'title': title,
                 'info_form': info_form,
@@ -227,7 +234,11 @@ def profile():
                 'security_success_msg': 'Данные успешно изменены',
                 'current_tab': '#profileSecurityTab'
             }
-            return render_template('profile.jinja2', **param)
+            logged_r = make_response()
+            login_user(cur_email, cur_password, logged_r)
+            r = make_response(render_template('profile.jinja2', **param))
+            r.headers = logged_r.headers
+            return r
         else:
             param = {
                 'title': title,

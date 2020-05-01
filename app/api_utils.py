@@ -143,9 +143,10 @@ class APIModel:
                                       **additional_json})
         if response:
             json_response = response.json()
-            if 'success' in json_response:
-                self._model_attrs.update(**self._set_model_attrs)
+            if user_id := json_response.get('user_id'):
+                self._model_attrs.clear()
                 self._set_model_attrs.clear()
+                self._id = user_id
                 return True
         return False
 
