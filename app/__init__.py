@@ -16,8 +16,9 @@ from app.views import main, uploads, docs
 from modules import constants, md_conversion
 
 from app.data import db_session
-from app.api import users_resource, users_friends_resource, chats_resource, \
-    messages_resource
+from app.api import (
+    users_resource, users_friends_resource, chats_resource, messages_resource
+)
 
 
 def translate_wtforms_error(error_text):
@@ -105,9 +106,11 @@ def create_app() -> Flask:
     app.jinja_env.globals['constants'] = constants
 
     # Генерация документации
-    md_conversion.markdown_to_html(constants.ROOT_DIR, 'app/docs/api_docs.md',
-                                   'app/docs/cached/api_docs.jinja2')
+    with app.app_context():
+        md_conversion.convert_all_md('app/docs/',
+                                     'app/docs/cached/')
 
     # Инициализация БД
     db_session.global_init(constants.DB_PATH)
+
     return app

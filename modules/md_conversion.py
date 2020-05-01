@@ -1,23 +1,30 @@
 import os
 import markdown
-
-opening_lines = ['{%extends "docs.jinja2" %}\n',
-                 '{% block docs %}\n',
-                 '<div class="container">\n']
-completion_lines = ['\n',
-                    '</div>\n',
-                    '{% endblock %}']
+from modules import constants
+import flask
 
 
-def markdown_to_html(root, file_to_convert, path):
-    md_file = open(os.path.join(root, file_to_convert), 'r')
-    all_file = ''
-    for line in md_file.readlines():
-        all_file += line + '\n'
-    md_file.close()
+def load_base():
+    base_path = os.path.join(flask.current_app.root_path,
+                             flask.current_app.template_folder,
+                             constants.DOCS_BASE_TEMPLATE)
+    with open(base_path) as base:
+        return base.read()
+
+
+def markdown_to_html(base, file_to_convert, path):
+    with open(os.path.join(constants.ROOT_DIR, file_to_convert), 'r') as md_file:
+        all_file = md_file.read()
     html = markdown.markdown(all_file)
-    html_file = open(os.path.join(root, path), 'w')
-    html_file.writelines(opening_lines)
-    html_file.write(html)
-    html_file.writelines(completion_lines)
-    html_file.close()
+    with open(os.path.join(constants.ROOT_DIR, path), 'w') as html_file:
+        html_file.write(base.replace('%DOCUMENTATION%', html))
+
+
+def convert_all_md(dir_to_convert, path):
+    base = load_base()
+    for file_to_convert in os.listdir(dir_to_convert):
+        filename, ext = os.path.splitext(file_to_convert)
+        if ext == '.md':
+            markdown_to_html(base,
+                             os.path.join(dir_to_convert, file_to_convert),
+                             os.path.join(path, filename + '.jinja2'))

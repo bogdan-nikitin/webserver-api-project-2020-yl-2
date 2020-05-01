@@ -76,3 +76,5 @@ ALLOWED_AUDIO_EXTENSIONS_HTML = ','.join({
 })
 
 JWT_LIVE_TIME = datetime.timedelta(days=1)
+
+DOCS_BASE_TEMPLATE = 'docs_inherited.jinja2'
