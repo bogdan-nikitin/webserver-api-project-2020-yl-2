@@ -72,10 +72,10 @@ class Users(SqlAlchemyBase, SerializerMixin):
         friends_list = []
         users_query = session.query(Users)
         for friend in self.incoming_friend_requests:
-            user = users_query.filter(Users.id == friend.inviter_id).first()
+            user = users_query.filter(Users.id == friend.invitee_id).first()
             friends_list.append(UsersFriend(user, friend.is_accepted))
         for friend in self.outgoing_friend_requests:
-            user = users_query.filter(Users.id == friend.invitee_id).first()
+            user = users_query.filter(Users.id == friend.inviter_id).first()
             friends_list.append(UsersFriend(user, friend.is_accepted))
         return friends_list
 
