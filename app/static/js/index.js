@@ -155,7 +155,7 @@ $(document).ready(function (){
         window.document.execCommand('insertText', false, text);
     });
 
-    // При нажатии Ctrl + Enter вставляем перенос строки, а при нажатии
+    // При нажатии Ctrl + Enter вставляем перенос строки, а при нажатии Enter
     // отправляем сообщение
     $('#indexMessageInput').keydown(function (e) {
         if(e.keyCode == 13){
@@ -197,7 +197,9 @@ $(document).ready(function (){
         }
         let scrollDistance = (parseInt(curInputHeight) -
                                       (parseInt(prevInputHeight)));
-        messagesListElem.scrollTop(messagesListElem.scrollTop() + scrollDistance);
+        messagesListElem.scrollTop(
+            messagesListElem.scrollTop() + scrollDistance
+        );
     });
 
     $('#indexChatBackBtn').on('click', switchChat);
@@ -206,7 +208,6 @@ $(document).ready(function (){
     $('#indexAttachStickerBtn').on('click', () => switchDisplay(stickerBlock));
 
     $('.index-addition-field').on('change', addNewField, appendAddition);
-
 })
 
 // Следующий код выполнится после полной загрузки документа

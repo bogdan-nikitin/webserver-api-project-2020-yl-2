@@ -1,3 +1,9 @@
+const apiServerGetUsersURL = new URL('/api/v1/users', apiServerURL);
+let currentFriendsSearchIndex = 0;
+let friendsSearchLimit = 20;
+let loadNewOn = 10;
+let lastSearchRequest = null;
+
 function deleteFriend(){
     let userID = this.getAttribute('data-user-id');
     let friendCard = $(`#friendsFriendsList
@@ -68,6 +74,42 @@ function addNewFriend(){
     // TODO Добавить добавление друга в БД
 }
 
+function searchFriends(){
+    $('#friendsSearchList').empty();
+    let searchReq = $('#friendsSearchInput').val();
+    loadFriendsFromSearch(searchReq);
+}
+
+function loadFriendsFromSearch(searchReq=lastSearchRequest){
+    if (lastSearchRequest != searchReq){
+        currentFriendsSearchIndex = 0;
+    }
+    let friendsSearchList = $('#friendsSearchList');
+    $.ajax({
+        url: apiServerGetUsersURL,
+        data: {search_request: searchReq,
+               start: currentFriendsSearchIndex,
+               limit: friendsSearchLimit},
+        success(data){
+            currentFriendsSearchIndex += friendsSearchLimit;
+            data.users.forEach(function(user, i, arr){
+                if (currentUserID == user.user_id){
+                    return;
+                }
+                let newFriendCard = $(friendNewHTML.format({
+                    friend_id: user.user_id,
+                    friend_name: [user.second_name, user.first_name].join(' ')
+                }));
+                newFriendCard.click(addNewFriend);
+                if (i + 1 == loadNewOn){
+                    newFriendCard.appear(loadFriendsFromSearch, {once: true});
+                }
+                friendsSearchList.append(newFriendCard);
+            });
+        }
+    });
+}
+
 $(function(){
     $('.friends-delete-friend-btn').click(deleteFriend);
 
@@ -80,4 +122,6 @@ $(function(){
     $('#friendsRequestsList .friends-deny-friend-btn').click(denyFriend);
 
     $('#friendsSearchList .friends-add-friend-btn').click(addNewFriend);
+
+    $('#friendsSearchForm').submit(searchFriends);
 });

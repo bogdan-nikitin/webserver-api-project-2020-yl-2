@@ -152,3 +152,54 @@ function forEach(sequence, func){
         func(sequence[i], i, sequence);
     }
 }
+
+let win = $(window);
+let onAppearEvents = new Map();
+let onDisappearEvents = new Map();
+//отслеживаем событие прокрутки страницы
+
+function isVisible(elem){
+    return win.scrollTop() + win.height() >= $(elem).offset().top;
+}
+
+function execAppearHandler(elem, handler, params, handlers){
+    $.proxy(handler, elem)();
+    if (params.once){
+        handlers.delete(handler);
+    }
+}
+
+
+win.scroll(function() {
+    // Складываем значение прокрутки страницы и высоту окна, этим мы получаем
+    // положение страницы относительно нижней границы окна, потом проверяем,
+    // если это значение больше, чем отступ нужного элемента от верха страницы,
+    // то значит элемент уже появился внизу окна, соответственно виден
+    onAppearEvents.forEach(function(handlers, elem){
+        if (isVisible(elem)) {
+            handlers.forEach(function(params, handler){
+                execAppearHandler(elem, handler, params, handlers);
+            });
+        }
+    });
+    onDisappearEvents.forEach(function(handlers, elem, map){
+        if (!isVisible(elem)) {
+            handlers.forEach(function(params, handler){
+                execAppearHandler(elem, handler, params, handlers);
+            });
+        }
+    });
+});
+
+function appearFunc(eventsMap){
+    return function (handler, params={once: false}){
+        if (this){
+            let handlers = eventsMap.get(this) || new Map();
+            handlers.set(handler, params);
+            eventsMap.set(this, handlers);
+        }
+    }
+}
+
+$.prototype.appear = appearFunc(onAppearEvents);
+$.prototype.disappear = appearFunc(onDisappearEvents);

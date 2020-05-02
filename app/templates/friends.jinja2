@@ -103,29 +103,24 @@
                                 <div class="d-flex align-items-center">
                                     <form action="#" role="search"
                                           onsubmit="return false;"
-                                          class="w-100 mb-3">
+                                          class="w-100 mb-3"
+                                          id="friendsSearchForm">
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <div class="input-group-text">
                                                     <i class="fas fa-search"></i>
                                                 </div>
                                             </div>
-
-                                            <input type="text"
+                                                <input type="search"
                                                    class="form-control"
                                                    id="friendsSearchInput"
                                                    placeholder="Поиск"
                                                    autocomplete="off">
-
                                         </div>
                                     </form>
                                 </div>
                                 <ul class="list-unstyled"
-                                    id="friendsSearchList">
-                                    {% for i in range(5) %}
-                                    {{ friend('new') }}
-                                    {% endfor %}
-                                </ul>
+                                    id="friendsSearchList"></ul>
                             </div>
                         </div>
                     </div>

@@ -66,9 +66,6 @@ class Users(SqlAlchemyBase, SerializerMixin):
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
 
-    def get_id(self):
-        return self.alternative_id
-
     @wraps(SerializerMixin.to_dict)
     def to_dict(self, *args, **kwargs):
         result = super().to_dict(*args, **kwargs)

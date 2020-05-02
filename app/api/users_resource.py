@@ -15,7 +15,7 @@ USERS_PRIVATE_ONLY = (
     'alternative_id', 'first_name', 'second_name', 'email',
     'phone_number', 'age', 'city', 'additional_inf',
     'is_confirmed', 'avatar', 'created_date')
-USERS_PUBLIC_ONLY = ('first_name', 'second_name', 'alternative_id')
+USERS_PUBLIC_ONLY = ('first_name', 'second_name', 'alternative_id', 'avatar')
 
 
 def abort_if_not_found(user_id):
