@@ -59,3 +59,4 @@ class UsersFriendsResource(Resource):
         session = db_session.create_session()
         user = session.query(Users).filter(Users.alternative_id == alt_id)
         flask_login.current_user.friends.remove(user)
+        return jsonify({'success': 'OK'})
