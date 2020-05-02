@@ -1,28 +1,17 @@
 from flask import jsonify
 from flask_jwt_extended import (
-    get_jwt_identity, jwt_optional, current_user, jwt_required,
-    verify_jwt_in_request, set_access_cookies, set_refresh_cookies
+    get_jwt_identity, jwt_optional, current_user, jwt_required
 )
 from flask_restful import Resource, abort
 from app.api.resource_arguments.users_args import *
+from app.api.users_utils import (
+    USERS_PRIVATE_ONLY, USERS_PUBLIC_ONLY, abort_if_not_found, users_like,
+    current_user_from_db, user_by_alt_id
+)
 from app.data import db_session
 from app.data.users import Users
 from app.data.tokens import Tokens
 from app.auth_utils import create_email_token
-
-
-USERS_PRIVATE_ONLY = (
-    'alternative_id', 'first_name', 'second_name', 'email',
-    'phone_number', 'age', 'city', 'additional_inf',
-    'is_confirmed', 'avatar', 'created_date')
-USERS_PUBLIC_ONLY = ('first_name', 'second_name', 'alternative_id', 'avatar')
-
-
-def abort_if_not_found(user_id):
-    session = db_session.create_session()
-    user = session.query(Users).filter(Users.alternative_id == user_id).first()
-    if not user:
-        abort(404, message=f'User {user_id} not found')
 
 
 def create_token(user, session=None):
@@ -33,30 +22,21 @@ def create_token(user, session=None):
     session.commit()
 
 
-def users_like(field, val):
-    return getattr(Users, field).like('%' + val + '%')
-
-
 class UsersResource(Resource):
     @staticmethod
     @jwt_optional
     def get(user_id=None):
-        user_id = user_id or get_jwt_identity()
+        identity = get_jwt_identity()
+        user_id = user_id or identity
         if not user_id:
             abort(400, message='User not specified')
         abort_if_not_found(user_id)
         session = db_session.create_session()
-        query = session.query(Users)
-        user = query.filter(Users.alternative_id == user_id).first()
+        user = user_by_alt_id(session, user_id)
         if current_user and user_id == current_user.user_id:
             return jsonify({'user': user.to_dict(only=USERS_PRIVATE_ONLY)})
-        # TODO Переделать код ниже
-        # if user in flask_login.current_user.friends:
-        #     return jsonify({'user': user.to_dict(
-        #         only=('alternative_id', 'first_name', 'second_name',
-        #               'phone_number', 'age', 'city', 'additional_inf',
-        #               'is_confirmed', 'api_key', 'avatar', 'created_date')
-        #     )})
+        elif identity and user in current_user_from_db(session).friends:
+            return jsonify({'user': user.to_dict(only=USERS_PRIVATE_ONLY)})
         return jsonify({'user': user.to_dict(only=USERS_PUBLIC_ONLY)})
 
     @staticmethod
@@ -64,10 +44,8 @@ class UsersResource(Resource):
     def put():
         args = put_parser.parse_args()
 
-        user_id = get_jwt_identity()
         session = db_session.create_session()
-        query = session.query(Users)
-        user: Users = query.filter(Users.alternative_id == user_id).first()
+        user = current_user_from_db(session)
 
         old_password = args.old_password
         email = args.email

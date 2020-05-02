@@ -82,13 +82,15 @@ def create_app() -> Flask:
     app.register_blueprint(uploads.blueprint)
 
     # Регистрация API
-    api_.add_resource(auth_resources.LoginResource, '/api/v1/login')
+    api_.add_resource(auth_resources.LoginResource, '/api/v1/login/')
     api_.add_resource(auth_resources.RefreshResource, '/api/v1/refresh/')
     api_.add_resource(users_resource.UsersListResource, '/api/v1/users')
     api_.add_resource(users_resource.UsersResource, '/api/v1/users/',
                       '/api/v1/users/<string:user_id>')
-    api_.add_resource(users_friends_resource.UsersFriendsResource,
+    api_.add_resource(users_friends_resource.UsersFriendsListResource,
                       '/api/v1/users_friends')
+    api_.add_resource(users_friends_resource.UsersFriendsResource,
+                      '/api/v1/users_friends/')
     api_.add_resource(chats_resource.ChatsResource, '/api/v1/chats')
     api_.add_resource(messages_resource.MessagesResource, '/api/v1/messages')
     api_.add_resource(messages_resource.MessagesListResource,

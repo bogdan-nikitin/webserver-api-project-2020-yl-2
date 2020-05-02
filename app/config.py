@@ -19,7 +19,8 @@ class Config:
 
 class DevelopmentConfig(Config):
     SECRET_KEY = JWT_SECRET_KEY = 'py_messages_test_secret_key'
-    JWT_ACCESS_TOKEN_EXPIRES = 60 * 2
+    # TODO Изменить время истечения токена на 15-30 минут
+    JWT_ACCESS_TOKEN_EXPIRES = 60 * 60
     UPLOAD_FOLDER = constants.UPLOAD_PATH
     ENV = 'development'
     DEBUG = True

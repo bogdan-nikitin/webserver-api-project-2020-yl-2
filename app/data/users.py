@@ -1,6 +1,7 @@
 import datetime
 import random
 import string
+from modules.anything import anything
 
 import sqlalchemy
 from flask_login import UserMixin
@@ -56,8 +57,27 @@ class Users(SqlAlchemyBase, SerializerMixin):
     messages = orm.relation('Messages', backref='message_sender')
     chats = orm.relation('Chats', secondary='chat_participants',
                          backref='chat_member')
-    friends = orm.relation('UsersFriends', backref='inviter',
-                           foreign_keys=[UsersFriends.inviter_id])
+    incoming_friend_requests = orm.relation(
+        'UsersFriends', backref='inviter',
+        foreign_keys=[UsersFriends.inviter_id]
+    )
+    outgoing_friend_requests = orm.relation(
+        'UsersFriends', backref='invitee',
+        foreign_keys=[UsersFriends.invitee_id]
+    )
+
+    @property
+    def friends(self):
+        session = db_session.create_session()
+        friends_list = []
+        users_query = session.query(Users)
+        for friend in self.incoming_friend_requests:
+            user = users_query.filter(Users.id == friend.inviter_id).first()
+            friends_list.append(UsersFriend(user, friend.is_accepted))
+        for friend in self.outgoing_friend_requests:
+            user = users_query.filter(Users.id == friend.invitee_id).first()
+            friends_list.append(UsersFriend(user, friend.is_accepted))
+        return friends_list
 
     def set_attributes(self, password):
         self.hashed_password = generate_password_hash(password)
@@ -73,3 +93,16 @@ class Users(SqlAlchemyBase, SerializerMixin):
             result['user_id'] = result['alternative_id']
             del result['alternative_id']
         return result
+
+
+class UsersFriend:
+    def __init__(self, user: Users, is_accepted):
+        self.__dict__['is_accepted'] = is_accepted
+        self.__dict__['_user'] = user
+
+    def __getattr__(self, item):
+        return getattr(self._user, item)
+
+    def __setattr__(self, key, value):
+        setattr(self._user, key, value)
+

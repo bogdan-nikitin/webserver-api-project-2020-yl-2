@@ -82,3 +82,6 @@ API_SERVER = 'http://localhost:5000'
 # Максимальное кол-во пользователей, которое вернёт UsersListResource при GET
 # запросе
 USERS_LIST_RESOURCE_GET_COUNT = 20
+USERS_FRIENDS_LIST_RESOURCE_IS_ACCEPTED_ARG = {
+    'true': True, 'false': False, 'null': None
+}
