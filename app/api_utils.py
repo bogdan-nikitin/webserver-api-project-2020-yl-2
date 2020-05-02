@@ -36,7 +36,8 @@ class WrongUserDataError(AuthError):
 
 def login_user(email, password, r):
     response = requests.post(
-        urllib.parse.urljoin(constants.API_SERVER, '/api/v1/login'),
+        urllib.parse.urljoin(current_app.config['API_SERVER'],
+                             '/api/v1/login/'),
         json={'email': email, 'password': password}
     )
     if response:
@@ -50,9 +51,10 @@ def login_user(email, password, r):
 
 
 def refresh_user(r):
-    response = requests.post(urllib.parse.urljoin(constants.API_SERVER,
-                                                  '/api/v1/refresh/'),
-                             json={'refresh_token': get_refresh_token()})
+    response = requests.post(urllib.parse.urljoin(
+        current_app.config['API_SERVER'],
+        '/api/v1/refresh/'),
+        json={'refresh_token': get_refresh_token()})
     if response:
         json_response = response.json()
         access_token = json_response.get('access_token')
@@ -83,7 +85,8 @@ def register_user(user_data) -> bool:
     """Функция регистрирует пользователя в приложении, используя переданный
     словарь user_data. В случае успеха возвращает True, иначе - False"""
     response = requests.post(
-        urllib.parse.urljoin(constants.API_SERVER, '/api/v1/users/'),
+        urllib.parse.urljoin(current_app.config['API_SERVER'],
+                             '/api/v1/users/'),
         json={**user_data}
     )
     if response:
@@ -95,7 +98,7 @@ def register_user(user_data) -> bool:
 
 def get_user_token(email, password):
     response = requests.get(
-        urllib.parse.urljoin(constants.API_SERVER, 'api/v1/tokens'),
+        urllib.parse.urljoin(current_app.config['API_SERVER'], 'api/v1/tokens'),
         json={'email': email, 'password': password}
     )
     if response:
@@ -106,7 +109,7 @@ def get_user_token(email, password):
 
 def verify_email_by_token(token) -> bool:
     response = requests.post(
-        urllib.parse.urljoin(constants.API_SERVER, 'api/v1/tokens'),
+        urllib.parse.urljoin(current_app.config['API_SERVER'], 'api/v1/tokens'),
         json={'token': token}
     )
     if response:
@@ -187,10 +190,11 @@ class APIModel:
 
 class UserAPIModel(APIModel):
     _attr_types = {'created_date': datetime.datetime.fromisoformat}
-    _url = urllib.parse.urljoin(constants.API_SERVER, '/api/v1/users/')
     _json_key = 'user'
 
     def __init__(self, user_id):
+        self._url = urllib.parse.urljoin(current_app.config['API_SERVER'],
+                                         '/api/v1/users/')
         super().__init__(user_id)
 
     @property

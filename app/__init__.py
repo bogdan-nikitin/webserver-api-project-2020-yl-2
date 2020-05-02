@@ -105,6 +105,7 @@ def create_app() -> Flask:
     app.add_template_global(translate_wtforms_error)
     app.add_template_global(re, 're')
     app.add_template_global(constants, 'constants')
+    app.add_template_global(app, 'current_app')
     app.context_processor(lambda: dict(current_user=get_current_user()))
 
     # Инициализация БД

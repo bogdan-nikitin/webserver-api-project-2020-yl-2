@@ -59,11 +59,11 @@ class Users(SqlAlchemyBase, SerializerMixin):
                          backref='chat_member')
     incoming_friend_requests = orm.relation(
         'UsersFriends', backref='inviter',
-        foreign_keys=[UsersFriends.inviter_id]
+        foreign_keys=[UsersFriends.invitee_id]
     )
     outgoing_friend_requests = orm.relation(
         'UsersFriends', backref='invitee',
-        foreign_keys=[UsersFriends.invitee_id]
+        foreign_keys=[UsersFriends.inviter_id]
     )
 
     @property
@@ -72,11 +72,13 @@ class Users(SqlAlchemyBase, SerializerMixin):
         friends_list = []
         users_query = session.query(Users)
         for friend in self.incoming_friend_requests:
-            user = users_query.filter(Users.id == friend.invitee_id).first()
-            friends_list.append(UsersFriend(user, friend.is_accepted))
+            if friend.is_accepted:
+                user = users_query.filter(Users.id == friend.inviter_id).first()
+                friends_list.append(user)
         for friend in self.outgoing_friend_requests:
-            user = users_query.filter(Users.id == friend.inviter_id).first()
-            friends_list.append(UsersFriend(user, friend.is_accepted))
+            if friend.is_accepted:
+                user = users_query.filter(Users.id == friend.invitee_id).first()
+                friends_list.append(user)
         return friends_list
 
     def set_attributes(self, password):
@@ -93,16 +95,4 @@ class Users(SqlAlchemyBase, SerializerMixin):
             result['user_id'] = result['alternative_id']
             del result['alternative_id']
         return result
-
-
-class UsersFriend:
-    def __init__(self, user: Users, is_accepted):
-        self.__dict__['is_accepted'] = is_accepted
-        self.__dict__['_user'] = user
-
-    def __getattr__(self, item):
-        return getattr(self._user, item)
-
-    def __setattr__(self, key, value):
-        setattr(self._user, key, value)
 

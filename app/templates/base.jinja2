@@ -32,7 +32,7 @@
             }
         });
 
-        const apiServerURL = new URL("{{ constants.API_SERVER }}");
+        const apiServerURL = new URL("{{ current_app.config['API_SERVER'] }}");
 
         {% if current_user %}
         var currentUserID = "{{ current_user.user_id }}";

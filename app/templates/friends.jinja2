@@ -15,7 +15,7 @@
     var friendRequestHTML = `{{ friend('request') }}`;
     var friendDeniedHTML = `{{ friend('denied') }}`;
     var friendNewHTML = `{{ friend('new') }}`;
-
+    var friendOutgoingHTML = `{{ friend('outgoing') }}`;
 </script>
 {% endblock %}
 
@@ -52,6 +52,13 @@
                                    aria-selected="false">Отклонённые</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" id="friendsOutgoingTab"
+                                   data-toggle="tab" href="#friendsOutgoing"
+                                   role="tab"
+                                   aria-controls="friendsOutgoing"
+                                   aria-selected="false">Исходящие</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="friendsSearchTab"
                                    data-toggle="tab" href="#friendsSearch"
                                    role="tab"
@@ -75,22 +82,22 @@
                                  aria-labelledby="friendsRequestsTab">
                                 <!-- requests -->
                                 <ul class="list-unstyled"
-                                    id="friendsRequestsList">
-                                    {% for i in range(5) %}
-                                    {{ friend('request') }}
-                                    {% endfor %}
-                                </ul>
+                                    id="friendsRequestsList"></ul>
                             </div>
                             <div class="tab-pane fade" id="friendsDenied"
                                  role="tabpanel"
                                  aria-labelledby="friendsDeniedTab">
                                 <!-- denied -->
                                 <ul class="list-unstyled"
-                                    id="friendsDeniedList">
-                                    {% for i in range(5) %}
-                                    {{ friend('denied') }}
-                                    {% endfor %}
-                                </ul>
+                                    id="friendsDeniedList"></ul>
+                            </div>
+                            <div class="tab-pane fade show"
+                                 id="friendsOutgoing"
+                                 role="tabpanel"
+                                 aria-labelledby="friendsOutgoingTab">
+                                <!-- outgoing -->
+                                <ul class="list-unstyled"
+                                    id="friendsOutgoingList"></ul>
                             </div>
                             <div class="tab-pane fade" id="friendsSearch"
                                  role="tabpanel"
@@ -107,10 +114,10 @@
                                                     <i class="fas fa-search"></i>
                                                 </div>
                                             </div>
-                                                <input type="search"
+                                            <input type="search"
                                                    class="form-control"
                                                    id="friendsSearchInput"
-                                                   placeholder="Поиск"
+                                                   placeholder="Введите имя или ID пользователя"
                                                    autocomplete="off">
                                         </div>
                                     </form>

@@ -19,11 +19,16 @@ class Config:
 
 class DevelopmentConfig(Config):
     SECRET_KEY = JWT_SECRET_KEY = 'py_messages_test_secret_key'
-    # TODO Изменить время истечения токена на 15-30 минут
-    JWT_ACCESS_TOKEN_EXPIRES = 60 * 60
+    JWT_ACCESS_TOKEN_EXPIRES = 60 * 30
     UPLOAD_FOLDER = constants.UPLOAD_PATH
     ENV = 'development'
     DEBUG = True
+
+    # Переменная не относится к библиотекам, сам сюда её впихнул
+    # Вообще, теперь невозможно использовать сервер через ngrok вне локальной
+    # сети, т.к. приложение не знает, через какие там туннели оно работает,
+    # а потому с веб-страниц невозможно посылать API запросы.
+    API_SERVER = 'http://localhost:5000'
 
     # Для рассылки email, необходимо заполнить следующие поля:
     # MAIL_SERVER =

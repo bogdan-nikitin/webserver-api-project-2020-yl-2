@@ -15,61 +15,136 @@ from modules.anything import anything
 from modules import constants
 
 
-
-
 class UsersFriendsResource(Resource):
+    @staticmethod
     @jwt_required
-    def post(self):
+    def post():
         args = post_parser.parse_args()
         abort_if_not_found(args.friend_id)
         session = db_session.create_session()
-        inviter = current_user_from_db(session)
-        invitee = user_by_alt_id(session, args.friend_id)
-        if session.query(UsersFriends).filter(
-                (UsersFriends.inviter_id == inviter.id) &
-                (UsersFriends.invitee_id == invitee.id)).first():
-            return jsonify({'error': 'Users already friends'})
-        users_friends_obj = UsersFriends(
-            inviter_id=inviter.id,
-            invitee_id=invitee.id
-        )
-        session.add(users_friends_obj)
+        cur_user = current_user_from_db(session)
+        friend = user_by_alt_id(session, args.friend_id)
+        action = args.action
+        if action in ('accept', 'deny'):
+            request_from_friend = session.query(UsersFriends).filter(
+                (UsersFriends.inviter_id == friend.id) &
+                (UsersFriends.invitee_id == cur_user.id)).first()
+            request_from_cur_user = session.query(UsersFriends).filter(
+                (UsersFriends.inviter_id == cur_user.id) &
+                (UsersFriends.invitee_id == friend.id)).first()
+            if request_from_friend:
+                if action == 'accept':
+                    if request_from_friend.is_accepted is True:
+                        return jsonify({
+                            'error': 'Friend request from {0} already accepted'
+                            .format(friend.alternative_id)
+                        })
+                    request_from_friend.is_accepted = True
+                else:
+                    if request_from_friend.is_accepted is False:
+                        return jsonify({
+                            'error':
+                                f'Friend request from {0} already denied'
+                                    .format(friend.id)
+                        })
+                    request_from_friend.is_accepted = False
+            elif request_from_cur_user:
+                if action == 'deny':
+                    request = UsersFriends()
+                    request.inviter_id = friend.id
+                    request.invitee_id = cur_user.id
+                    request.is_accepted = False
+                    session.add(request)
+                    session.delete(request_from_cur_user)
+                else:
+                    return jsonify({
+                        'error': 'Only invitee can accept friend request'
+                    })
+            else:
+                if not (request_from_friend or request_from_cur_user):
+                    return jsonify(
+                        {'error': '{0} didn\'t send friend request to {1}'
+                         .format(friend.alternative_id,
+                                 cur_user.alternative_id)}
+                    )
+        elif action == 'add':
+            request = session.query(UsersFriends).filter(
+                (UsersFriends.inviter_id == cur_user.id) &
+                (UsersFriends.invitee_id == friend.id)).first()
+            if request:
+                return jsonify({
+                    'error': 'Friend request to {0} already sent'
+                    .format(friend.alternative_id)
+                })
+            users_friends_obj = UsersFriends(
+                inviter_id=cur_user.id,
+                invitee_id=friend.id
+            )
+            session.add(users_friends_obj)
         session.commit()
         return jsonify({'success': 'OK'})
 
-    # @flask_login.login_required
-    def delete(self):
+    @staticmethod
+    @jwt_required
+    def delete():
         args = delete_parser.parse_args()
-        alt_id = args['alternative_id']
+        alt_id = args.friend_id
         abort_if_not_found(alt_id)
         session = db_session.create_session()
-        user = session.query(Users).filter(Users.alternative_id == alt_id)
-        flask_login.current_user_from_db.friends.remove(user)
-        return jsonify({'success': 'OK'})
-
-
-def friend_to_dict(friend):
-    is_accepted = friend.is_accepted
-    if is_accepted:
-        only = USERS_PRIVATE_ONLY
-    else:
-        only = USERS_PUBLIC_ONLY
-    friend_dict = friend.to_dict(only=only)
-    friend_dict['is_accepted'] = is_accepted
-    return friend_dict
+        user = user_by_alt_id(session, alt_id)
+        cur_user = current_user_from_db(session)
+        request = session.query(UsersFriends).filter(
+            (UsersFriends.inviter_id == cur_user.id) &
+            (UsersFriends.invitee_id == user.id)
+        ).first()
+        if request:
+            session.delete(request)
+            session.commit()
+            return jsonify({'success': 'OK'})
+        else:
+            return jsonify({
+                'error': f'You didn\'t send friend request to user {alt_id}'
+            })
 
 
 class UsersFriendsListResource(Resource):
+    @staticmethod
     @jwt_required
-    def get(self):
+    def get():
         args = list_get_parser.parse_args()
         session = db_session.create_session()
         cur_user = current_user_from_db(session)
-        is_accepted = constants.USERS_FRIENDS_LIST_RESOURCE_IS_ACCEPTED_ARG.get(
-            args.is_accepted, args.is_accepted)
-        friends_list = list(filter(lambda f: f.is_accepted == is_accepted,
-                                   cur_user.friends))
-        return jsonify({'friends': list(map(friend_to_dict, friends_list))})
+        type_ = args.type
+        query = session.query(Users)
+        if type_ == 'incoming':
+            friend_dicts = []
+            for request in cur_user.incoming_friend_requests:
+                request: UsersFriends
+                if request.is_accepted is not True:
+                    user = query.filter(Users.id == request.inviter_id).first()
+                    friend_dict = user.to_dict(only=USERS_PUBLIC_ONLY)
+                    friend_dict['is_accepted'] = request.is_accepted
+                    friend_dicts += [friend_dict]
+            return jsonify({'friends': friend_dicts})
+        elif type_ == 'outgoing':
+            friends = []
+            for request in cur_user.outgoing_friend_requests:
+                request: UsersFriends
+                if not request.is_accepted:
+                    user = query.filter(Users.id == request.invitee_id).first()
+                    friends += [user]
+            return jsonify({'friends': [
+                user.to_dict(only=USERS_PUBLIC_ONLY)
+                for user in friends
+            ]})
+        else:
+            return jsonify({
+                'friends': [
+                    user.to_dict(only=USERS_PUBLIC_ONLY)
+                    for user in cur_user.friends
+                ]
+            })
+
         # res = []
         # for friend in cur_user.friends:
         #     users_friends_obj = session.query(UsersFriends) \
