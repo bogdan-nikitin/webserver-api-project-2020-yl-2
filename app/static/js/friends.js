@@ -1,8 +1,3 @@
-const apiServerUsersURL = new URL('/api/v1/users', apiServerURL);
-const apiServerUsersFriendsURL = new URL('/api/v1/users_friends/',
-                                         apiServerURL);
-const apiServerUsersFriendsListURL = new URL('/api/v1/users_friends',
-    apiServerURL);
 let currentFriendsSearchIndex = 0;
 let friendsSearchLimit = 20;
 let loadNewOn = 10;
@@ -15,10 +10,6 @@ function actionWithFriend(friend_id, action, options={}){
         method: "POST",
         data: {action: action, friend_id: friend_id}
     }, options));
-}
-
-function fullUserName(user){
-    return [user.second_name, user.first_name].join(' ');
 }
 
 function getFriendCard(userID, userName){

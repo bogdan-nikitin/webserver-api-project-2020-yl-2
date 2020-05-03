@@ -1,3 +1,5 @@
+{% from "index_msg.jinja2" import message %}
+
 {% extends "base.jinja2" %}
 
 {% block head %}
@@ -13,10 +15,11 @@
 <script src="{{ url_for('static', filename='js/general.js') }}"></script>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 <script>
-    var messageHTML = ``;
+    var chatHTML = `{% include "index_chat.jinja2" %}`;
     var photoAdditionHTML = `{% include "index_photo_addition.jinja2" %}`;
     var additionHTML = `{% include "index_addition.jinja2" %}`;
-
+    var userMsgHTML = `{{ message('user') }}`;
+    var interlocutorMsgHTML = `{{ message('interlocutor') }}`;
 </script>
 {% endblock %}
 
@@ -70,30 +73,6 @@
                      role="tablist">
                     <!-- TODO Убрать цикл, добавлять элементы через JS, вставить
                           реальные данные -->
-                    {% for i in range(20) %}
-                    <a class="list-group-item rounded-0 list-group-item-action index-chats-chat-item"
-                       id="user{{ loop.index }}" data-toggle="list"
-                       role="tab" href="#">
-                        <div class="index-chats-chat d-flex justify-content-between align-items-center">
-
-                            <div class="index-chats-chat-user-info d-flex justify-content-between align-items-center">
-                                <img src="static/img/logo.png"
-                                     class="index-chats-chat-user-avatar rounded-circle mr-3">
-                                <div class="w-100">
-                                    <span class="text-truncate w-100 d-block">
-                                        Ivan Ivanov
-                                    </span>
-                                    <small class="text-truncate w-100 d-block">
-                                        Hello World!
-                                    </small>
-                                </div>
-                            </div>
-                            <span class="badge badge-primary badge-pill">
-                            {{ loop.index }}
-                            </span>
-                        </div>
-                    </a>
-                    {% endfor %}
                 </div>
             </div>
 
@@ -108,28 +87,15 @@
                 </button>
                 <div class="index-current-chat-interlocutor d-flex align-items-centers justify-content-start">
                     <img src="static/img/logo.png"
-                         class="index-current-chat-user-avatar rounded-circle mr-2">
+                         class="index-current-chat-user-avatar rounded-circle mr-2" id="indexCurrentChatUserAvatar">
                     <div class="index-current-chat-user-info d-flex align-items-center">
                         <a class="index-current-chat-user-name text-dark"
-                           href="/#">
-                            Ivan Ivanov
-                        </a>
+                           href="/#" id="indexChatHeaderUserName"></a>
                     </div>
                 </div>
             </div>
             <div class="index-current-chat-messages-list"
                  id="indexCurrentChatMessagesList">
-                {% for _ in range(20) %}
-                <div class="index-user-message index-chat-message balloon-right">
-                    Hello World many many many many many many many many many
-                    many many times {{ loop.index }}<br>
-                    Hello<br>
-                    World!
-                </div>
-                <div class="index-interlocutor-message index-chat-message balloon-left">
-                    Hello World!
-                </div>
-                {% endfor %}
             </div>
             <div class="index-input-message-block fixed-bottom position-absolute"
                  id="indexMessageBlock">

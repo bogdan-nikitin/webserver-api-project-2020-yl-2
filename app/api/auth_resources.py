@@ -4,10 +4,11 @@ from flask_jwt_extended import (
     jwt_refresh_token_required, verify_jwt_refresh_token_in_request,
     get_raw_jwt, decode_token, view_decorators, jwt_optional
 )
+import datetime
 
 from flask_restful import Resource, abort
 
-from app.api.resource_arguments.auth_args import parser
+from app.api.resource_arguments.auth_args import login_post_parser
 # from app.auth_utils import create_auth_token
 from app.data import db_session
 from app.data.users import Users
@@ -27,7 +28,7 @@ class LoginResource(Resource):
 
     @staticmethod
     def post():
-        args = parser.parse_args()
+        args = login_post_parser.parse_args()
         email = args.email
         session = db_session.create_session()
         user: Users = session.query(Users).filter(Users.email == email).first()
@@ -39,7 +40,13 @@ class LoginResource(Resource):
             abort(401, message='Bad password')
             return
         user_id = user.alternative_id
-        access_token = create_access_token(identity=user_id)
+        try:
+            if expires_in := args.get('expires_in'):
+                expires_in = datetime.timedelta(seconds=expires_in)
+        except OverflowError:
+            return jsonify({'error': 'expires_in value too big'})
+        access_token = create_access_token(identity=user_id,
+                                           expires_delta=expires_in)
         refresh_token = create_refresh_token(identity=user_id)
         return jsonify(access_token=access_token, refresh_token=refresh_token)
         # token = create_auth_token({'aud': user.get_id()})

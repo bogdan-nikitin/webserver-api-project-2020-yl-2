@@ -69,7 +69,7 @@ class Users(SqlAlchemyBase, SerializerMixin):
     @property
     def friends(self):
         session = db_session.create_session()
-        friends_list = []
+        friends_list = FriendsList()
         users_query = session.query(Users)
         for friend in self.incoming_friend_requests:
             if friend.is_accepted:
@@ -96,3 +96,7 @@ class Users(SqlAlchemyBase, SerializerMixin):
             del result['alternative_id']
         return result
 
+
+class FriendsList(list):
+    def __contains__(self, user: Users):
+        return any(friend.id == user.id for friend in self)

@@ -1,11 +1,17 @@
 import sqlalchemy
 from datetime import datetime
 from sqlalchemy import orm
+from sqlalchemy_serializer import SerializerMixin
+from app.data.users import Users
+from app.data.db_session import SqlAlchemyBase, create_session
+from functools import wraps
 
-from .db_session import SqlAlchemyBase
 
+class Messages(SqlAlchemyBase, SerializerMixin):
+    serialize_types = (
+        (datetime, datetime.timestamp),
+    )
 
-class Messages(SqlAlchemyBase):
     __tablename__ = 'messages'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
@@ -20,3 +26,12 @@ class Messages(SqlAlchemyBase):
     is_read = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     sending_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.now)
     additives = orm.relation('Additives', backref='message')
+
+    @wraps(SerializerMixin.to_dict)
+    def to_dict(self, *args, **kwargs):
+        session = create_session()
+        msg_dict = super().to_dict(*args, **kwargs)
+        if sender_id := msg_dict.get('sender_id'):
+            user: Users = session.query(Users).get(sender_id)
+            msg_dict['sender_id'] = user.alternative_id
+        return msg_dict

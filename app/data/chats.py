@@ -16,4 +16,4 @@ class Chats(SqlAlchemyBase):
                                          sqlalchemy.ForeignKey('users.id'),
                                          nullable=False)
     title = sqlalchemy.Column(sqlalchemy.String, nullable=True, default=None)
-    chat_participants = orm.relation('ChatParticipants', backref='chat')
+    chat_participants = orm.relation('ChatParticipants', backref='chats')

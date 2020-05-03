@@ -1,3 +1,11 @@
+const apiServerUsersURL = new URL('/api/v1/users', apiServerURL);
+const apiServerUsersFriendsURL = new URL('/api/v1/users_friends/',
+                                         apiServerURL);
+const apiServerUsersFriendsListURL = new URL('/api/v1/users_friends',
+    apiServerURL);
+const apiServerMessagesURL = new URL('/api/v1/messages/', apiServerURL);
+const apiServerMessagesListURL = new URL('/api/v1/messages', apiServerURL);
+
 // Этот код позволяет использовать функцию jQuery.style(name, value, priority),
 // где priority - это important или же ничего. В чистом JQuery нет возможности
 // задать этот флаг.
@@ -214,3 +222,16 @@ Array.prototype.remove = function() {
     }
     return this;
 };
+
+function fullUserName(user){
+    return [user.second_name, user.first_name].join(' ');
+}
+
+function isEqual(obj1, obj2){
+    for (let prop in obj1){
+        if (obj1[prop] != obj2[prop]){
+            return false;
+        }
+    }
+    return true;
+}
