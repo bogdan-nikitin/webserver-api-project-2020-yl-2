@@ -13,9 +13,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.users_utils import current_user_from_db, user_by_alt_id
 import datetime
 from operator import itemgetter
-
-
-MESSAGES_ONLY = ('sender_id', 'text', 'is_read', 'sending_date', 'chat_id')
+from flask_socketio import emit
 
 
 def get_chat(session, first_user, second_user):
@@ -87,6 +85,8 @@ class MessagesResource(Resource):
         )
         session.add(message)
         session.commit()
+        emit('new_message', message.to_dict(), room=f'chat_{chat.id}',
+             namespace='/')
         return jsonify({'success': 'OK'})
 
 
@@ -113,7 +113,7 @@ class MessagesListResource(Resource):
                                     (Messages.chat_id == chat.id)).order_by(
                 Messages.sending_date).all()
             messages_serialized = [
-                msg.to_dict(only=MESSAGES_ONLY) for msg in messages
+                msg.to_dict() for msg in messages
             ]
             return jsonify({'messages': messages_serialized})
         else:
@@ -140,7 +140,7 @@ class MessagesListResource(Resource):
                     ).alternative_id
                 last_message_dict = msg_query.filter(
                     Messages.chat_id == chat_id
-                ).first().to_dict(only=MESSAGES_ONLY)
+                ).first().to_dict()
                 last_message_dict['chat_with'] = chat_with
                 messages += [last_message_dict]
             return jsonify({'messages': messages})

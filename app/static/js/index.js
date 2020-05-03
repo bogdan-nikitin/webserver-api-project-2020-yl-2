@@ -1,32 +1,27 @@
-//console.log('Connecting to WebSocket...');
-//var socket = io();
-//console.log('Connected!');
-//socket.on('connect', function() {
-//    let room = '123';
-//    socket.emit('my_event', {data: 'I\'m connected!'});
-//});
-//// console.log(current_user);
+console.log('Connecting to WebSocket...');
+var socket = io();
+socket.on('connect', function() {
+    console.log('Connected to WebSocket!');
+});
+socket.on('new_message', function(msg){
+    let msgText = msg.text;
+    let chatInfo = currentChatInfo();
+    let msgElem;
+    if (chatInfo.chat_id == msg.chat_id){
+        if (chatInfo.user_id == msg.sender_id){
+            msgElem = getInterlocutorMsg(msgText);
+        }
+        else{
+            msgElem = getUserMsg(msgText);
+        }
+        $('#indexCurrentChatMessagesList').append(msgElem);
+        scrollMessages();
+    }
+    changeLastMsg(chatInfo.user_id || chatInfo.chat_id, msgText);
+});
 
-//var request = new Request('/test',
-// {method: 'GET', Authorization: 'Basic 12324'});
-//
-//
-//fetch(request)
-//  .then(response => {
-//    if (response.status === 200) {
-//      console.log(response);
-//      return response.json();
-//    } else {
-//      throw new Error('Something went wrong on api server!');
-//    }
-//  })
-//  .then(response => {
-//    console.debug(response);
-//    // ...
-//  }).catch(error => {
-//    console.error(error);
-//  });
-
+// Данный символ используется в тех местах, где должен был быть текст, но его
+// там не оказалось (костыль в общем)
 const voidChar = " ";  // Это не пробел
 
 var chatsData = new Map();
@@ -47,7 +42,9 @@ function switchChat(){
     if (userID){
         let chatData = chatsData.get(userID);
         $('#indexChatHeaderUserName').text(chatData.user_name || '-');
-        $('#indexCurrentChatUserAvatar').attr('src', chatData.avatar);
+        $('#indexCurrentChatUserAvatar').attr(
+            'src', new URL(chatData.avatar, uploadsURL)
+        );
         loadMessages(userID);
     }
     let curChatElem = $('#indexCurrentChatBlock');
@@ -157,6 +154,14 @@ function getInterlocutorMsg(text){
     return $(interlocutorMsgHTML.format({text: text || voidChar}));
 }
 
+function changeLastMsg(ID, text){
+    let chat = $(
+        `.index-chats-chat-item[data-user-id="${ID}"],
+        .index-chats-chat-item[data-chat-id="${ID}"]`
+    );
+    chat.find('.index-chat-last-msg').text(text || voidChar);
+}
+
 function loadMessages(userID){
     let messagesList = $('#indexCurrentChatMessagesList');
     messagesList.empty();
@@ -174,6 +179,7 @@ function loadMessages(userID){
                 }
                 messagesList.append(msgElem);
             });
+            scrollMessages();
         }
     });
 }
@@ -185,7 +191,7 @@ function loadChats(){
         success(data){
             data.messages.forEach(function(msg, i, messages){
                 chatsData.set(msg.chat_with || msg.chat_id,
-                              {last_msg: msg.text});
+                              {last_msg: msg.text, chat_id: msg.chat_id});
             });
             $.ajax({
                 url: apiServerUsersFriendsListURL,
@@ -195,7 +201,7 @@ function loadChats(){
                             user_id: friend.user_id,
                             user_name: fullUserName(friend),
                             last_msg: voidChar,
-                            avatar: friend.avatar
+                            avatar: new URL(friend.avatar, uploadsURL)
                         }, chatsData.get(friend.user_id, {}));
                         chatsData.set(friend.user_id, chatData);
                         let chat = getChat(chatData);
@@ -212,12 +218,7 @@ function currentChatInfo(){
     if (chat){
         let userID = chat.attr('data-user-id');
         let chatID = chat.attr('data-chat-id');
-        if (userID != '{user_id}'){
-            return {user_id: userID};
-        }
-        else if (chatID != '{chat_id}'){
-            return {chat_id: chatID};
-        }
+        return {user_id: userID, chat_id: chatID};
     }
     return {};
 }
@@ -226,14 +227,6 @@ function currentChatInfo(){
 // Следующий код выполнится после загрузки DOM
 $(document).ready(function (){
     freezeScroll('#indexCurrentChatMessagesList', '#indexChatsList');
-
-//    $('.index-chats-chat-item').click(switchChat);
-
-    // TODO Сделать переключение вкладок
-//    $('a[data-toggle="list"]').on('show.bs.tab',
-//        function (elem){
-//            console.log(elem);
-//        });
 
     let messageInput = $('#indexMessageInput')
     // Убираем всё форматирование из текста, который вставляется в поле ввода
@@ -273,11 +266,6 @@ $(document).ready(function (){
                         data: $.extend(chatSendInfo,
                                        {text: msgText}),
                         success(data){
-                            let msg = getUserMsg(msgText);
-                            if (isEqual(currentChatInfo(), chatInfo)){
-                                $('#indexCurrentChatMessagesList').append(msg);
-                                scrollMessages();
-                            }
                         }
                     });
                     return false;

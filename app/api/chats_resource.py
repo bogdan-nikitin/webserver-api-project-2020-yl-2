@@ -1,4 +1,4 @@
-import flask_login
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import jsonify
 from flask_restful import Resource, abort
 
@@ -8,28 +8,27 @@ from app.data.chats import Chats
 from app.data.messages import Messages
 # from app.data.chat_participants import ChatParticipants
 from app.api.resource_arguments.chats_args import post_parser, delete_parser
+from app.api.users_utils import (
+    user_by_alt_id, abort_if_user_not_found, current_user_from_db
+)
 
 
 def abort_if_not_found(chat_id):
     session = db_session.create_session()
     chat = session.query(Chats).get(chat_id)
     if not chat:
-        abort(404, message=f'Чат {chat_id} не найден')
-
-
-def abort_if_user_not_found_by_alt_id(alt_id):
-    session = db_session.create_session()
-    user = session.query(Users).filter(Users.alternative_id == alt_id)
-    if not user:
-        abort(404, message=f'Пользователь с alternative_id {alt_id} не найден')
+        abort(404, message=f'Chat {chat_id} not found')
 
 
 class ChatsResource(Resource):
-    @flask_login.login_required
-    def get(self):
-        return flask_login.current_user.chats
+    @staticmethod
+    @jwt_required
+    def get():
+        session = db_session.create_session()
+        cur_user = current_user_from_db(session)
+        return jsonify({'chats': [chat.to_dict() for chat in cur_user.chats]})
 
-    @flask_login.login_required
+    @jwt_required
     def post(self):
         # метод post с помощью ChatParticipants
 
@@ -60,7 +59,7 @@ class ChatsResource(Resource):
         session.commit()
         return jsonify({'success': 'OK'})
 
-    @flask_login.login_required
+    @jwt_required
     def delete(self):
         args = delete_parser.parse_args()
         alt_id = args.get('alternative_id')

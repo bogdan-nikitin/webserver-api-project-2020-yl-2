@@ -2,9 +2,14 @@ import sqlalchemy
 from sqlalchemy import orm
 
 from .db_session import SqlAlchemyBase
+from sqlalchemy_serializer import SerializerMixin
 
 
-class Chats(SqlAlchemyBase):
+class Chats(SqlAlchemyBase, SerializerMixin):
+    # Это почему-то ни в какую не работает
+    # serialize_rules = ('-chat_participants',)
+    serialize_only = ('id', 'first_author_id', 'second_author_id', 'title')
+
     __tablename__ = 'chats'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,

@@ -8,7 +8,7 @@ from app.api.resource_arguments.users_friends_args import (
     list_get_parser, post_parser, delete_parser
 )
 from app.api.users_utils import (
-    abort_if_not_found, USERS_PUBLIC_ONLY, USERS_PRIVATE_ONLY,
+    abort_if_user_not_found, USERS_PUBLIC_ONLY, USERS_PRIVATE_ONLY,
     current_user_from_db, user_by_alt_id
 )
 from modules.anything import anything
@@ -20,7 +20,7 @@ class UsersFriendsResource(Resource):
     @jwt_required
     def post():
         args = post_parser.parse_args()
-        abort_if_not_found(args.friend_id)
+        abort_if_user_not_found(args.friend_id)
         session = db_session.create_session()
         cur_user = current_user_from_db(session)
         friend = user_by_alt_id(session, args.friend_id)
@@ -89,7 +89,7 @@ class UsersFriendsResource(Resource):
     def delete():
         args = delete_parser.parse_args()
         alt_id = args.friend_id
-        abort_if_not_found(alt_id)
+        abort_if_user_not_found(alt_id)
         session = db_session.create_session()
         user = user_by_alt_id(session, alt_id)
         cur_user = current_user_from_db(session)

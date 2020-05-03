@@ -5,7 +5,7 @@ from flask_jwt_extended import (
 from flask_restful import Resource, abort
 from app.api.resource_arguments.users_args import *
 from app.api.users_utils import (
-    USERS_PRIVATE_ONLY, USERS_PUBLIC_ONLY, abort_if_not_found, users_like,
+    USERS_PRIVATE_ONLY, USERS_PUBLIC_ONLY, abort_if_user_not_found, users_like,
     current_user_from_db, user_by_alt_id
 )
 from app.data import db_session
@@ -30,7 +30,7 @@ class UsersResource(Resource):
         user_id = user_id or identity
         if not user_id:
             abort(400, message='User not specified')
-        abort_if_not_found(user_id)
+        abort_if_user_not_found(user_id)
         session = db_session.create_session()
         user = user_by_alt_id(session, user_id)
         if current_user and user_id == current_user.user_id:

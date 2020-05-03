@@ -34,6 +34,11 @@
 
         const apiServerURL = new URL("{{ current_app.config['API_SERVER'] }}");
 
+        const uploadsURL = new URL(
+            "{{ url_for('upload.uploaded_file', filename='') }}",
+            apiServerURL
+        );
+
         {% if current_user %}
         var currentUserID = "{{ current_user.user_id }}";
         {% else %}
@@ -62,7 +67,7 @@
                     <!-- TODO Вставить реальные данные и фото -->
                     <span class="badge badge-pill badge-light mr-2">5</span>
                     <div class="dropdown">
-                        <a class="page-header-user-first-name dropdown-toggle"
+                        <a class="page-header-user-first-name dropdown-toggle mr-2"
                            href="#" role="button" id="pageHeaderUserDropdown"
                            data-toggle="dropdown" aria-haspopup="true"
                            aria-expanded="false">
@@ -83,10 +88,8 @@
                                href="{{ url_for('main.logout') }}">Выйти</a>
                         </div>
                     </div>
-                    <img src="static/img/logo.png" alt=""
+                    <img src="{{ url_for('upload.uploaded_file', filename=current_user.avatar or '') }}" alt=""
                          class="page-header-user-avatar rounded-circle">
-                    <!-- <img src="{{ current_user.avatar }}" alt=""-->
-                    <!--      class="page-header-user-avatar rounded-circle">-->
                 </div>
             </div>
             {% endif %}

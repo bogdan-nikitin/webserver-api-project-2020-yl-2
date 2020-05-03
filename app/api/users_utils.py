@@ -12,7 +12,7 @@ USERS_PRIVATE_ONLY = (
 USERS_PUBLIC_ONLY = ('first_name', 'second_name', 'alternative_id', 'avatar')
 
 
-def abort_if_not_found(user_id):
+def abort_if_user_not_found(user_id):
     session = db_session.create_session()
     user = session.query(Users).filter(Users.alternative_id == user_id).first()
     if not user:

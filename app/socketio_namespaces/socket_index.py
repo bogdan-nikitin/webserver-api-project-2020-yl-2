@@ -2,19 +2,20 @@ from flask_socketio import join_room, leave_room, send, Namespace, emit
 
 
 class IndexNamespace(Namespace):
-    def on_connect(self):
-        join_room('test')
-        pass
-
-    def on_disconnect(self):
-        pass
-
-    def on_my_event(self, data):
-        print('hi')
-        emit('my_response', data)
-
-    def on_my_response(self, data):
-        print('my_response', data)
+    pass
+    # def on_connect(self):
+    #     join_room('test')
+    #     pass
+    #
+    # def on_disconnect(self):
+    #     pass
+    #
+    # def on_my_event(self, data):
+    #     print('hi')
+    #     emit('my_response', data)
+    #
+    # def on_my_response(self, data):
+    #     print('my_response', data)
 #
 #
 # @socketio.on('my_event', namespace='/')

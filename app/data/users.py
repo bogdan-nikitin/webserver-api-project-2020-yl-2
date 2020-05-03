@@ -13,6 +13,7 @@ from app.data import db_session
 from app.data.db_session import SqlAlchemyBase
 from app.data.users_friends import UsersFriends
 from functools import wraps
+from modules import constants
 
 
 def generate_alternative_id():
@@ -51,7 +52,8 @@ class Users(SqlAlchemyBase, SerializerMixin):
     additional_inf = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     is_confirmed = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    avatar = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    avatar = sqlalchemy.Column(sqlalchemy.String, nullable=True,
+                               default=constants.USER_DEFAULT_AVATAR)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
     messages = orm.relation('Messages', backref='message_sender')

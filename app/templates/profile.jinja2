@@ -76,7 +76,7 @@
                                     {% endfor %}
                                     <div class="form-group">
                                         <div class="mb-3">Аватар</div>
-                                        <img src="static/img/logo.png"
+                                        <img src="{{ url_for('upload.uploaded_file', filename=current_user.avatar or '') }}"
                                              class="rounded-circle mb-3 profile-avatar-img"
                                              id="profileAvatarImg">
                                         <div class="custom-file"

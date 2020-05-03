@@ -61,6 +61,9 @@ def create_app() -> Flask:
     else:
         app.config.from_object(app_config)
 
+    if not os.path.exists(constants.UPLOAD_PATH):
+        os.makedirs(constants.UPLOAD_PATH)
+
     # Инициализация частей приложения
     # login_manager.init_app(app)
     mail.app = app
@@ -91,7 +94,7 @@ def create_app() -> Flask:
                       '/api/v1/users_friends')
     api_.add_resource(users_friends_resource.UsersFriendsResource,
                       '/api/v1/users_friends/')
-    api_.add_resource(chats_resource.ChatsResource, '/api/v1/chats')
+    api_.add_resource(chats_resource.ChatsResource, '/api/v1/chats/')
     api_.add_resource(messages_resource.MessagesResource, '/api/v1/messages/')
     api_.add_resource(messages_resource.MessagesListResource,
                       '/api/v1/messages')

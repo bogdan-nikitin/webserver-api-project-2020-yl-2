@@ -11,6 +11,7 @@ class Messages(SqlAlchemyBase, SerializerMixin):
     serialize_types = (
         (datetime, datetime.timestamp),
     )
+    serialize_only = ('sender_id', 'text', 'is_read', 'sending_date', 'chat_id')
 
     __tablename__ = 'messages'
 
