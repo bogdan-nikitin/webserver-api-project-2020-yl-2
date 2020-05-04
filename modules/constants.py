@@ -16,6 +16,7 @@ WTFORMS_ERRORS_TRANSLATION = {
     'Not a valid integer value': 'Указано не число'
 }
 
+# Ссылки в подвале на главной странице
 PAGE_NAV_LINKS = {
     'Главная': 'main.index',
     'Вход': 'main.login',
@@ -25,6 +26,8 @@ PAGE_NAV_LINKS = {
     'Выйти': 'main.logout'
 }
 
+# URL почт по доменам. Необходимо, чтобы при регистрации отсылать пользователя
+# в его почтовый ящик
 MAIL_DOMAINS_URLS = {
     "mail.ru": "https://e.mail.ru/",
     "bk.ru": "https://e.mail.ru/",
@@ -76,3 +79,9 @@ ALLOWED_AUDIO_EXTENSIONS_HTML = ','.join({
 })
 
 JWT_LIVE_TIME = datetime.timedelta(days=1)
+
+# Максимальное кол-во пользователей, которое вернёт UsersListResource при GET
+# запросе
+USERS_LIST_RESOURCE_GET_COUNT = 20
+
+USER_DEFAULT_AVATAR = 'avatar.jpg'

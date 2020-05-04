@@ -15,7 +15,7 @@
     var friendRequestHTML = `{{ friend('request') }}`;
     var friendDeniedHTML = `{{ friend('denied') }}`;
     var friendNewHTML = `{{ friend('new') }}`;
-
+    var friendOutgoingHTML = `{{ friend('outgoing') }}`;
 </script>
 {% endblock %}
 
@@ -52,6 +52,13 @@
                                    aria-selected="false">Отклонённые</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" id="friendsOutgoingTab"
+                                   data-toggle="tab" href="#friendsOutgoing"
+                                   role="tab"
+                                   aria-controls="friendsOutgoing"
+                                   aria-selected="false">Исходящие</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="friendsSearchTab"
                                    data-toggle="tab" href="#friendsSearch"
                                    role="tab"
@@ -68,33 +75,29 @@
                                  aria-labelledby="friendsFriendsTab">
                                 <!-- friends -->
                                 <ul class="list-unstyled"
-                                    id="friendsFriendsList">
-                                    {% for i in range(5) %}
-                                    {{ friend('friend') }}
-                                    {% endfor %}
-                                </ul>
+                                    id="friendsFriendsList"></ul>
                             </div>
                             <div class="tab-pane fade" id="friendsRequests"
                                  role="tabpanel"
                                  aria-labelledby="friendsRequestsTab">
                                 <!-- requests -->
                                 <ul class="list-unstyled"
-                                    id="friendsRequestsList">
-                                    {% for i in range(5) %}
-                                    {{ friend('request') }}
-                                    {% endfor %}
-                                </ul>
+                                    id="friendsRequestsList"></ul>
                             </div>
                             <div class="tab-pane fade" id="friendsDenied"
                                  role="tabpanel"
                                  aria-labelledby="friendsDeniedTab">
                                 <!-- denied -->
                                 <ul class="list-unstyled"
-                                    id="friendsDeniedList">
-                                    {% for i in range(5) %}
-                                    {{ friend('denied') }}
-                                    {% endfor %}
-                                </ul>
+                                    id="friendsDeniedList"></ul>
+                            </div>
+                            <div class="tab-pane fade show"
+                                 id="friendsOutgoing"
+                                 role="tabpanel"
+                                 aria-labelledby="friendsOutgoingTab">
+                                <!-- outgoing -->
+                                <ul class="list-unstyled"
+                                    id="friendsOutgoingList"></ul>
                             </div>
                             <div class="tab-pane fade" id="friendsSearch"
                                  role="tabpanel"
@@ -103,29 +106,24 @@
                                 <div class="d-flex align-items-center">
                                     <form action="#" role="search"
                                           onsubmit="return false;"
-                                          class="w-100 mb-3">
+                                          class="w-100 mb-3"
+                                          id="friendsSearchForm">
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <div class="input-group-text">
                                                     <i class="fas fa-search"></i>
                                                 </div>
                                             </div>
-
-                                            <input type="text"
+                                            <input type="search"
                                                    class="form-control"
                                                    id="friendsSearchInput"
-                                                   placeholder="Поиск"
+                                                   placeholder="Введите имя или ID пользователя"
                                                    autocomplete="off">
-
                                         </div>
                                     </form>
                                 </div>
                                 <ul class="list-unstyled"
-                                    id="friendsSearchList">
-                                    {% for i in range(5) %}
-                                    {{ friend('new') }}
-                                    {% endfor %}
-                                </ul>
+                                    id="friendsSearchList"></ul>
                             </div>
                         </div>
                     </div>

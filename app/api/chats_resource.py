@@ -1,35 +1,27 @@
-import flask_login
 from flask import jsonify
-from flask_restful import Resource, abort
+from flask_jwt_extended import jwt_required
+from flask_restful import Resource
 
-from app.data import db_session
-from app.data.users import Users
-from app.data.chats import Chats
-from app.data.messages import Messages
+from app.api.chats_utils import get_chat, abort_if_chat_not_found
 # from app.data.chat_participants import ChatParticipants
 from app.api.resource_arguments.chats_args import post_parser, delete_parser
-
-
-def abort_if_not_found(chat_id):
-    session = db_session.create_session()
-    chat = session.query(Chats).get(chat_id)
-    if not chat:
-        abort(404, message=f'Чат {chat_id} не найден')
-
-
-def abort_if_user_not_found_by_alt_id(alt_id):
-    session = db_session.create_session()
-    user = session.query(Users).filter(Users.alternative_id == alt_id)
-    if not user:
-        abort(404, message=f'Пользователь с alternative_id {alt_id} не найден')
+from app.api.users_utils import (
+    abort_if_user_not_found, current_user_from_db, user_by_alt_id
+)
+from app.data import db_session
+from app.data.chats import Chats
+from app.data.messages import Messages
 
 
 class ChatsResource(Resource):
-    @flask_login.login_required
-    def get(self):
-        return flask_login.current_user.chats
+    @staticmethod
+    @jwt_required
+    def get():
+        session = db_session.create_session()
+        cur_user = current_user_from_db(session)
+        return jsonify({'chats': [chat.to_dict() for chat in cur_user.chats]})
 
-    @flask_login.login_required
+    @jwt_required
     def post(self):
         # метод post с помощью ChatParticipants
 
@@ -60,13 +52,13 @@ class ChatsResource(Resource):
         session.commit()
         return jsonify({'success': 'OK'})
 
-    @flask_login.login_required
+    @jwt_required
     def delete(self):
         args = delete_parser.parse_args()
         alt_id = args.get('alternative_id')
         chat_id = args.get('id')
         if chat_id:
-            abort_if_not_found(chat_id)
+            abort_if_chat_not_found(chat_id)
             session = db_session.create_session()
             chat = session.query(Chats).get(chat_id)
             messages = session.query(Messages).filter(
@@ -75,17 +67,14 @@ class ChatsResource(Resource):
                 session.delete(message)
             session.delete(chat)
             session.commit()
+            return jsonify({'success': 'OK'})
         elif alt_id:
-            abort_if_user_not_found_by_alt_id(alt_id)
+            abort_if_user_not_found(alt_id)
             session = db_session.create_session()
-            user_id = session.query(Users).filter(
-                Users.alternative_id == alt_id).id
-            cur_user_id = flask_login.current_user.id
-            chat = session.query(Chats).filter(
-                ((Chats.first_author_id == user_id)
-                 | (Chats.first_author_id == cur_user_id))
-                and ((Chats.second_author_id == user_id)
-                     | (Chats.second_author_id == cur_user_id)))
+            user = user_by_alt_id(session, alt_id)
+            cur_user = current_user_from_db(session)
+            chat = get_chat(session, user, cur_user)
             session.delete(chat)
             session.commit()
-        return jsonify({'success': 'OK'})
+            return jsonify({'success': 'OK'})
+        return jsonify({'error': 'Bad request'})

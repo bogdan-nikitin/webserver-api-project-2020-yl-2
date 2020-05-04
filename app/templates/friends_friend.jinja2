@@ -29,6 +29,12 @@
                             data-user-id="{friend_id}">
                         Отклонить
                     </button>
+                    {% elif type == 'outgoing' %}
+                    <button type="button"
+                            class="btn btn-secondary friends-cancel-request-btn"
+                            data-user-id="{friend_id}">
+                        Отменить
+                    </button>
                     {% endif %}
                 </div>
             </div>

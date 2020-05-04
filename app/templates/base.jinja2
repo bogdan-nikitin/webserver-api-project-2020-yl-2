@@ -6,8 +6,9 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+    <script
+            src="https://code.jquery.com/jquery-3.5.0.min.js"
+            integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ="
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
             integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
@@ -19,6 +20,26 @@
           href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" type="image/x-icon"
           href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <script type="text/javascript">
+        var csrfToken = "{{ csrf_token() }}";
+        var refreshTime = ({{ current_app.config['JWT_ACCESS_TOKEN_EXPIRES'] }} - 5 * 60) * 1000;
+
+        // const apiServerURL = new URL("{{ current_app.config['API_SERVER'] }}");
+        // TODO Поменять код ниже, если API сервер изменится
+        const apiServerURL = new URL(window.location.origin);
+
+        const uploadsURL = new URL(
+            "{{ url_for('upload.uploaded_file', filename='') }}",
+            apiServerURL
+        );
+
+        {% if current_user %}
+        var currentUserID = "{{ current_user.user_id }}";
+        {% else %}
+        var currentUserID = null;
+        {% endif %}
+    </script>
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
     <title>{{ title }}</title>
     {% block head_end %}{% endblock %}
 </head>
@@ -32,22 +53,20 @@
                    href="{{ url_for('main.index') }}">
                     <img src="{{ url_for('static', filename='img/logo.png') }}"
                          alt="" class="page-header-logo rounded-circle">
-                    <span class="page-header-app-name">PyMessages</span>
+                    <span class="page-header-app-name d-md-block d-none">PyMessages</span>
                 </a>
             </div>
-            <!-- TODO Заменить or на and -->
-            {% if not hide_user or current_user.is_authenticated %}
+            {% if not hide_user and current_user %}
             <div class="col-auto">
                 <div class="page-header-user d-flex align-items-center">
-                    <!-- TODO Вставить реальные данные и фото -->
-                    <span class="badge badge-pill badge-light mr-2">5</span>
+                    <!--                    <span class="badge badge-pill badge-light mr-2">5</span>-->
                     <div class="dropdown">
-                        <a class="page-header-user-first-name dropdown-toggle"
+                        <a class="page-header-user-first-name dropdown-toggle mr-2"
                            href="#" role="button" id="pageHeaderUserDropdown"
                            data-toggle="dropdown" aria-haspopup="true"
                            aria-expanded="false">
-                            Ivan Ivanov
                             {{ current_user.first_name }}
+                            {{ current_user.second_name }}
                         </a>
                         <div class="dropdown-menu dropdown-menu-right"
                              aria-labelledby="pageHeaderUserDropdown">
@@ -63,10 +82,9 @@
                                href="{{ url_for('main.logout') }}">Выйти</a>
                         </div>
                     </div>
-                    <img src="static/img/logo.png" alt=""
+                    <img alt=""
+                         src="{{ url_for('upload.uploaded_file', filename=current_user.avatar or '') }}"
                          class="page-header-user-avatar rounded-circle">
-                    <!-- <img src="{{ current_user.avatar }}" alt=""-->
-                    <!--      class="page-header-user-avatar rounded-circle">-->
                 </div>
             </div>
             {% endif %}
@@ -112,7 +130,10 @@
                     </div>
                 </div>
                 <div class="page-footer-app-name">
-                    PyMessages, 2020
+                    PyMessages, 2020<br>
+                    <a href="https://github.com/bogdan-nikitin/webserver-api-project-2020-yl-2">
+                        Github
+                    </a>
                 </div>
             </div>
         </div>

@@ -1,85 +1,127 @@
-import flask_login
+import datetime
+from operator import itemgetter
+
 from flask import jsonify
-from flask_restful import Resource, abort
+from flask_jwt_extended import jwt_required
+from flask_restful import Resource
+from flask_socketio import emit
 
+from app.api.chats_utils import get_chat
+from app.api.resource_arguments.messages_args import (
+    post_parser, list_get_parser
+)
+from app.api.users_utils import current_user_from_db, user_by_alt_id
 from app.data import db_session
-from app.data.users import Users
-from app.data.messages import Messages
+from app.data.chat_participants import ChatParticipants
 from app.data.chats import Chats
-from app.api.resource_arguments.messages_args import post_parser
-
-
-def abort_if_not_found(obj_id, obj_class):
-    session = db_session.create_session()
-    obj = session.query(obj_class).get(obj_id)
-    if not obj:
-        abort(404, message=f'Объекст класса {obj_class}'
-                           f' с id {obj_id} не найден')
-
-
-def abort_if_user_not_found_by_alt_id(alt_id):
-    session = db_session.create_session()
-    user = session.query(Users).filter(Users.alternative_id == alt_id)
-    if not user:
-        abort(404, message=f'Пользователь с alternative_id {alt_id} не найден')
+from app.data.messages import Messages
+from app.data.users import Users
 
 
 class MessagesResource(Resource):
-    @flask_login.login_required
-    def post(self):
+    @staticmethod
+    @jwt_required
+    def post():
         args = post_parser.parse_args()
         session = db_session.create_session()
+        cur_user = current_user_from_db(session)
+        receiver_id = args.receiver_id
+        chat_id = args.chat_id
+        if not (chat_id or receiver_id) or (chat_id and receiver_id):
+            return jsonify({'error': 'You must specify chat_id OR receiver_id'})
+        query = session.query(Chats)
+        if receiver_id:
+            receiver = user_by_alt_id(session, receiver_id)
+            chat = get_chat(session, cur_user, receiver)
+            if not chat:
+                if cur_user not in receiver.friends:
+                    return jsonify({'error': 'User {0} isn\' your friend'
+                                   .format(cur_user.alternative_id)})
+                chat = Chats()
+                chat.first_author_id = cur_user.id
+                chat.second_author_id = receiver.id
+                session.add(chat)
+                session.commit()
+                chat_id = chat.id
+
+                cur_user_participant = ChatParticipants()
+                cur_user_participant.chat_id = chat_id
+                cur_user_participant.user_id = cur_user.id
+
+                receiver_participant = ChatParticipants()
+                receiver_participant.chat_id = chat_id
+                receiver_participant.user_id = receiver.id
+
+                chat.chat_participants += [cur_user_participant,
+                                           receiver_participant]
+        else:
+            chat = query.filter(Chats.id == chat_id).first()
+            if not chat:
+                return jsonify({'error': 'Chat with id {0} not found'
+                               .format(chat_id)})
         message = Messages(
-            sender_id=args['sender_id'],
-            chat_id=args['chat_id'],
-            text=args['text']
+            sender_id=cur_user.id,
+            chat_id=chat.id,
+            text=args.text
         )
         session.add(message)
         session.commit()
+        emit('new_message', message.to_dict(), room=f'chat_{chat.id}',
+             namespace='/')
         return jsonify({'success': 'OK'})
 
 
 class MessagesListResource(Resource):
-    @flask_login.login_required
-    def get(self, alt_id=None, date=None):
-        res = []
+    @staticmethod
+    @jwt_required
+    def get():
+        args = list_get_parser.parse_args()
+        receiver_id = args.receiver_id
+        chat_id = args.chat_id
         session = db_session.create_session()
-        if alt_id and date:
-            abort_if_user_not_found_by_alt_id(alt_id)
-            user = session.query(Users).filter(Users.alternative_id == alt_id)
-            for message in user.messages:
-                if message.created_date > date:
-                    chat_id = message.chat_id
-                    abort_if_not_found(chat_id, Chats)
-                    chat = session.query(Chats).get(chat_id)
-                    for chat_participant in chat.chat_participants:
-                        if chat_participant.user_id ==\
-                                flask_login.current_user.id:
-                            res.append(message)
-            return res
-        elif alt_id:
-            abort_if_user_not_found_by_alt_id(alt_id)
-            user = session.query(Users).filter(Users.alternative_id == alt_id)
-            for message in user.messages:
-                chat_id = message.chat_id
-                abort_if_not_found(chat_id, Chats)
-                chat = session.query(Chats).get(chat_id)
-                for chat_participant in chat.chat_participants:
-                    if chat_participant.user_id == flask_login.current_user.id:
-                        res.append(message)
-            return res
+        cur_user = current_user_from_db(session)
+        if receiver_id or chat_id:
+            if receiver_id:
+                receiver = user_by_alt_id(session, receiver_id)
+                chat = get_chat(session, cur_user, receiver)
+            else:
+                chat = session.query(Chats).filter(Chats.id == chat_id).first()
+            if not chat:
+                return jsonify({'messages': []})
+            query = session.query(Messages)
+            date = datetime.datetime.fromtimestamp(args.date)
+            messages = query.filter((Messages.sending_date > date) &
+                                    (Messages.chat_id == chat.id)).order_by(
+                Messages.sending_date).all()
+            messages_serialized = [
+                msg.to_dict() for msg in messages
+            ]
+            return jsonify({'messages': messages_serialized})
         else:
-            for friend in flask_login.current_user.friends:
-                for message in friend.messages[::-1]:
-                    message_found = False
-                    chat_id = message.chat_id
-                    abort_if_not_found(chat_id, Chats)
-                    chat = session.query(Chats).get(chat_id)
-                    for chat_participant in chat.chat_participants:
-                        if chat_participant.user_id ==\
-                                flask_login.current_user.id:
-                            res.append(message)
-                            message_found = True
-                    if message_found:
-                        break
-            return res
+            chats_ids = list(map(
+                itemgetter(0),
+                session.query(ChatParticipants.chat_id).filter(
+                    ChatParticipants.user_id == cur_user.id).all()
+            ))
+            chats_query = session.query(Chats)
+            msg_query = session.query(Messages).order_by(
+                Messages.sending_date.desc()
+            )
+            messages = []
+            users_query = session.query(Users)
+            for chat_id in chats_ids:
+                chat: Chats = chats_query.get(chat_id)
+                if chat.first_author_id == cur_user.id:
+                    chat_with = users_query.get(
+                        chat.second_author_id
+                    ).alternative_id
+                else:
+                    chat_with = users_query.get(
+                        chat.first_author_id
+                    ).alternative_id
+                last_message_dict = msg_query.filter(
+                    Messages.chat_id == chat_id
+                ).first().to_dict()
+                last_message_dict['chat_with'] = chat_with
+                messages += [last_message_dict]
+            return jsonify({'messages': messages})

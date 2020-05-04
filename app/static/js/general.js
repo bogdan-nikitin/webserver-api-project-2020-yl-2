@@ -20,7 +20,8 @@
     CSSStyleDeclaration.prototype.getPropertyValue = function(a) {
       return this.getAttribute(a);
     };
-    CSSStyleDeclaration.prototype.setProperty = function(styleName, value, priority) {
+    CSSStyleDeclaration.prototype.setProperty = function(styleName, value,
+                                                         priority) {
       this.setAttribute(styleName, value);
       var priority = typeof priority != 'undefined' ? priority : '';
       if (priority != '') {
@@ -28,7 +29,9 @@
         var rule = new RegExp(escape(styleName) + '\\s*:\\s*' + escape(value) +
             '(\\s*;)?', 'gmi');
         this.cssText =
-            this.cssText.replace(rule, styleName + ': ' + value + ' !' + priority + ';');
+            this.cssText.replace(
+                rule, styleName + ': ' + value + ' !' + priority + ';'
+            );
       }
     };
     CSSStyleDeclaration.prototype.removeProperty = function(a) {
@@ -151,4 +154,81 @@ function forEach(sequence, func){
     for (let i = 0;i < sequence.length; i++){
         func(sequence[i], i, sequence);
     }
+}
+
+let win = $(window);
+let onAppearEvents = new Map();
+let onDisappearEvents = new Map();
+//отслеживаем событие прокрутки страницы
+
+function isVisible(elem){
+    return win.scrollTop() + win.height() >= $(elem).offset().top;
+}
+
+function execAppearHandler(elem, handler, params, handlers){
+    $.proxy(handler, elem)();
+    if (params.once){
+        handlers.delete(handler);
+    }
+}
+
+
+win.scroll(function() {
+    // Складываем значение прокрутки страницы и высоту окна, этим мы получаем
+    // положение страницы относительно нижней границы окна, потом проверяем,
+    // если это значение больше, чем отступ нужного элемента от верха страницы,
+    // то значит элемент уже появился внизу окна, соответственно виден
+    onAppearEvents.forEach(function(handlers, elem){
+        if (isVisible(elem)) {
+            handlers.forEach(function(params, handler){
+                execAppearHandler(elem, handler, params, handlers);
+            });
+        }
+    });
+    onDisappearEvents.forEach(function(handlers, elem, map){
+        if (!isVisible(elem)) {
+            handlers.forEach(function(params, handler){
+                execAppearHandler(elem, handler, params, handlers);
+            });
+        }
+    });
+});
+
+function appearFunc(eventsMap){
+    return function (handler, params={once: false}){
+        if (this){
+            let handlers = eventsMap.get(this) || new Map();
+            handlers.set(handler, params);
+            eventsMap.set(this, handlers);
+        }
+    }
+}
+
+$.prototype.appear = appearFunc(onAppearEvents);
+$.prototype.disappear = appearFunc(onDisappearEvents);
+
+Array.prototype.remove = function() {
+    var what, a = arguments, L = a.length, ax;
+    while (L && this.length) {
+        what = a[--L];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+};
+
+// Возвращает строку с полным именем пользователя user
+function fullUserName(user){
+    return [user.second_name, user.first_name].join(' ');
+}
+
+// Проверка схожести объектов по их полям
+function isEqual(obj1, obj2){
+    for (let prop in obj1){
+        if (obj1[prop] != obj2[prop]){
+            return false;
+        }
+    }
+    return true;
 }

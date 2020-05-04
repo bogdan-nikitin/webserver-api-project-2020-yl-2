@@ -51,7 +51,8 @@
                     <div class="form-group w-100">
                         {% set field = form.password %}
                         {{ field(class="form-control" + (" is-invalid" if
-                        field.errors else ""), placeholder=field.label_name) }}
+                        field.errors else ""), placeholder=field.label_name,
+                        autocomplete="off") }}
                         {% for error in field.errors %}
                         <div class="invalid-feedback">
                             {{ error }}
@@ -62,7 +63,8 @@
                     <div class="form-group w-100">
                         {% set field = form.repeat_password %}
                         {{ field(class="form-control" + (" is-invalid" if
-                        field.errors else ""), placeholder=field.label_name) }}
+                        field.errors else ""), placeholder=field.label_name,
+                        autocomplete="off") }}
                         {% for error in field.errors %}
                         <div class="invalid-feedback">
                             {{ error }}

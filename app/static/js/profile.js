@@ -17,7 +17,7 @@ $(document).ready(function(){
 
     // Показываем новую загруженную аватарку
     $('#profileAvatarFileField').on('change', function(){
-        let file = $('#avatar')[0].files[0];
+        let file = $('#info-avatar')[0].files[0];
         let reader = new FileReader();
         reader.onload = function(e) {
             $('#profileAvatarImg').attr('src', e.target.result);

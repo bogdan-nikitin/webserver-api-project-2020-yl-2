@@ -1,31 +1,62 @@
-//console.log('Connecting to WebSocket...');
-//var socket = io();
-//console.log('Connected!');
-//socket.on('connect', function() {
-//    let room = '123';
-//    socket.emit('my_event', {data: 'I\'m connected!'});
-//});
-//// console.log(current_user);
+console.log('Connecting to WebSocket...');
+var socket = io();
+socket.on('connect', function() {
+    console.log('Connected to WebSocket!');
+});
 
-//var request = new Request('/test',
-// {method: 'GET', Authorization: 'Basic 12324'});
-//
-//
-//fetch(request)
-//  .then(response => {
-//    if (response.status === 200) {
-//      console.log(response);
-//      return response.json();
-//    } else {
-//      throw new Error('Something went wrong on api server!');
-//    }
-//  })
-//  .then(response => {
-//    console.debug(response);
-//    // ...
-//  }).catch(error => {
-//    console.error(error);
-//  });
+socket.on('new_message', function(msg){
+    let userID = msg.sender_id;
+    if (userID != currentUserID && !hasChat(userID)){
+        $.ajax({
+            url: apiServerUsersURL,
+            method: "GET",
+            data: {user_id: msg.sender_id},
+            success(data){
+                let user = data.user;
+                let chatData = {
+                    user_id: userID,
+                    avatar: new URL(user.avatar, uploadsURL),
+                    last_msg: voidChar,
+                    user_name: fullUserName(user)
+                };
+                chatsData.set(userID, chatData);
+                appendChat(chatData);
+                handleNewMessage(msg);
+            }
+        });
+    }
+    handleNewMessage(msg);
+});
+
+function hasChat(ID){
+    return Boolean($(
+            `.index-chats-chat-item[data-chat-id="${ID}"],
+            .index-chats-chat-item[data-user-id="${ID}"]`
+        ).length);
+}
+
+function handleNewMessage(msg){
+    let msgText = msg.text;
+    let chatInfo = currentChatInfo();
+    let msgElem;
+    if (chatInfo.chat_id == msg.chat_id){
+        if (chatInfo.user_id == msg.sender_id){
+            msgElem = getInterlocutorMsg(msgText);
+        }
+        else{
+            msgElem = getUserMsg(msgText);
+        }
+        $('#indexCurrentChatMessagesList').append(msgElem);
+        scrollMessages();
+    }
+    changeLastMsg(chatInfo.user_id || chatInfo.chat_id, msgText);
+}
+
+// Данный символ используется в тех местах, где должен был быть текст, но его
+// там не оказалось (костыль в общем)
+const voidChar = " ";  // Это не пробел
+
+var chatsData = new Map();
 
 var removedAdditionsFiles = [];
 
@@ -38,6 +69,16 @@ function scrollMessages(){
 
 // Функция переключает отображение текущего чата и списка чатов
 function switchChat(){
+    $('#indexCurrentChatBlock').style('display', 'block');
+    let userID = $(this).attr('data-user-id');
+    if (userID){
+        let chatData = chatsData.get(userID);
+        $('#indexChatHeaderUserName').text(chatData.user_name || '-');
+        $('#indexCurrentChatUserAvatar').attr(
+            'src', new URL(chatData.avatar, uploadsURL)
+        );
+        loadMessages(userID);
+    }
     let curChatElem = $('#indexCurrentChatBlock');
     let chatsElem = $('#indexChatsBlock');
     if (curChatElem.hasClass('d-none')){
@@ -68,15 +109,6 @@ function addNewField(){
     elem.after($(newElem));
     elem.hide();
     newElem.on('change', addNewField, appendAddition)
-//    let reader = new FileReader();
-//
-//    reader.onload = function(e) {
-//        console.log(e.target.result);
-//        console.log(e);
-////        $('img').attr('src', e.target.result);
-//    }
-//
-//    reader.readAsDataURL(this.files[0]);
 }
 
 function appendAddition(){
@@ -88,18 +120,12 @@ function appendAddition(){
                 if (fieldType == 'indexPhotoAddition'){
                     let reader = new FileReader();
                     reader.onload = function(e) {
-//                        console.log(e.target.result);
-//                        console.log(e);
                         let photo = $(photoAdditionHTML.format({
                             file_name: file.name,
                             last_modified: file.lastModified,
                             src: e.target.result
                         }));
                         $('#indexAdditionsPhotoList').append(photo);
-                //        $('img').attr('src', e.target.result);
-//                        if (i == (arr.length - 1)){
-//                            $('#indexAdditionLoadingModal').modal('hide');
-//                        }
                         photo.click(removeAddition);
                     }
                     reader.readAsDataURL(file);
@@ -134,39 +160,137 @@ function removeAddition(){
     return false;
 }
 
+function getChat(options){
+    let chat = $(chatHTML.format(options));
+    return chat.click(switchChat);
+}
+
+function appendChat(options){
+    $('#indexMessagesChatsListGroup').append(getChat(options));
+}
+
+function getUserMsg(text){
+    return $(userMsgHTML.format({text: text || voidChar}));
+}
+
+function getInterlocutorMsg(text){
+    return $(interlocutorMsgHTML.format({text: text || voidChar}));
+}
+
+function changeLastMsg(ID, text){
+    let chat = $(
+        `.index-chats-chat-item[data-user-id="${ID}"],
+        .index-chats-chat-item[data-chat-id="${ID}"]`
+    );
+    chat.find('.index-chat-last-msg').text(text || voidChar);
+}
+
+function loadMessages(userID){
+    let messagesList = $('#indexCurrentChatMessagesList');
+    messagesList.empty();
+    $.ajax({
+        url: apiServerMessagesListURL,
+        data: {receiver_id: userID},
+        success(data){
+            data.messages.forEach(function(msg, i, messages){
+                let msgElem;
+                if (msg.sender_id == currentUserID){
+                    msgElem = getUserMsg(msg.text);
+                }
+                else{
+                    msgElem = getInterlocutorMsg(msg.text);
+                }
+                messagesList.append(msgElem);
+            });
+            scrollMessages();
+        }
+    });
+}
+
+function loadChats(){
+    $.ajax({
+        url: apiServerMessagesListURL,
+        success(data){
+            data.messages.forEach(function(msg, i, messages){
+                chatsData.set(msg.chat_with || msg.chat_id,
+                              {last_msg: msg.text, chat_id: msg.chat_id});
+            });
+            $.ajax({
+                url: apiServerUsersFriendsListURL,
+                success(data){
+                    data.friends.forEach(function(friend, i, arr){
+                        let chatData = $.extend({
+                            user_id: friend.user_id,
+                            user_name: fullUserName(friend),
+                            last_msg: voidChar,
+                            avatar: new URL(friend.avatar, uploadsURL)
+                        }, chatsData.get(friend.user_id, {}));
+                        chatsData.set(friend.user_id, chatData);
+                        appendChat(chatData);
+                    });
+                }
+            })
+        }
+    });
+}
+
+function currentChatInfo(){
+    let chat = $('.index-chats-chat-item.active');
+    if (chat){
+        let userID = chat.attr('data-user-id');
+        let chatID = chat.attr('data-chat-id');
+        return {user_id: userID, chat_id: chatID};
+    }
+    return {};
+}
+
 
 // Следующий код выполнится после загрузки DOM
 $(document).ready(function (){
-
     freezeScroll('#indexCurrentChatMessagesList', '#indexChatsList');
 
-    $('.index-chats-chat-item').on('click', switchChat);
-
-    // TODO Сделать переключение вкладок
-//    $('a[data-toggle="list"]').on('show.bs.tab',
-//        function (elem){
-//            console.log(elem);
-//        });
-
+    let messageInput = $('#indexMessageInput')
     // Убираем всё форматирование из текста, который вставляется в поле ввода
     // сообщения
-    $('#indexMessageInput').on('paste', function (e) {
+    messageInput.on('paste', function (e) {
         e.preventDefault();
         let text = (e.originalEvent || e).clipboardData.getData('text/plain');
         window.document.execCommand('insertText', false, text);
     });
 
-    // При нажатии Ctrl + Enter вставляем перенос строки, а при нажатии
+    // При нажатии Ctrl + Enter вставляем перенос строки, а при нажатии Enter
     // отправляем сообщение
-    $('#indexMessageInput').keydown(function (e) {
+    messageInput.keydown(function (e) {
         if(e.keyCode == 13){
             if (e.ctrlKey){
                 window.document.execCommand('insertText', false, '\n');
             }
             else {
-                // TODO Реализовать отправку сообщения
-                console.log('TODO');
-                return false;
+                let msgText = messageInput.text();
+                if (!msgText){
+                    return false;
+                }
+                let chatInfo = currentChatInfo();
+                if (chatInfo){
+                    let chatSendInfo = {};
+                    if (chatInfo.user_id){
+                        chatSendInfo.receiver_id = chatInfo.user_id;
+                    }
+                    else if (chatInfo.chat_id){
+                        chatSendInfo.chat_id = chatInfo.chat_id;
+                    }
+                    messageInput.text('');
+                    $.ajax({
+                        url: apiServerMessagesURL,
+                        method: "POST",
+                        dataType: 'json',
+                        data: $.extend(chatSendInfo,
+                                       {text: msgText}),
+                        success(data){
+                        }
+                    });
+                    return false;
+                }
             }
         }
     });
@@ -198,7 +322,9 @@ $(document).ready(function (){
         }
         let scrollDistance = (parseInt(curInputHeight) -
                                       (parseInt(prevInputHeight)));
-        messagesListElem.scrollTop(messagesListElem.scrollTop() + scrollDistance);
+        messagesListElem.scrollTop(
+            messagesListElem.scrollTop() + scrollDistance
+        );
     });
 
     $('#indexChatBackBtn').on('click', switchChat);
@@ -208,6 +334,9 @@ $(document).ready(function (){
 
     $('.index-addition-field').on('change', addNewField, appendAddition);
 
+    loadChats();
+
+    $('#indexCurrentChatBlock').style('display', 'none', 'important');
 })
 
 // Следующий код выполнится после полной загрузки документа

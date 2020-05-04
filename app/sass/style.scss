@@ -107,9 +107,6 @@ $app_window_mb: 30px;
         color: white;
         text-decoration: none;
     }
-    @media (max-width: 383px){
-        display: none;
-    }
 }
 .page-header-logo-and-name{
     display: flex;
@@ -133,7 +130,9 @@ $app_window_mb: 30px;
     align-items: center;
 }
 .page-header-user-avatar{
-    width: 35px;
+    $side_size: 35px;
+    width: $side_size;
+    height: $side_size;
 }
 .page-header-user-first-name{
     color: white;
@@ -168,9 +167,16 @@ $app_window_mb: 30px;
     color: #51ACFF;
 }
 .page-footer-app-name{
-    color: lightgray;
+    $text_color: lightgray;
+    color: $text_color;
     padding: 0 15px;
     font-size: 12px;
+    & *{
+        &, &:hover{
+            color: $text_color;
+        }
+
+    }
 }
 .page-footer-nav-block{
     margin-bottom: 10px;
@@ -441,3 +447,5 @@ $app_window_mb: 30px;
     width: $side_size;
     height: $side_size;
 }
+
+// CSS - боль...

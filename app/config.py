@@ -5,14 +5,34 @@ from modules import constants
 
 
 class Config:
-    pass
+    JWT_TOKEN_LOCATION = ('cookies', 'json', 'query_string')
+    JWT_ERROR_MESSAGE_KEY = 'message'
+    WTF_CSRF_CHECK_DEFAULT = False
+    JWT_COOKIE_CSRF_PROTECT = False
+    JWT_SESSION_COOKIE = False
+
+    # Параметр ниже отвечает за то, будут ли куки отправляться только по
+    # протоколу HTTPS. В данный момент у приложения нет сертификата, так что
+    # параметр равен False. Но при запуске приложения на прод, то крайне
+    # желательно поставить True, т.к. иначе злоумышленник сможет похитить ключ
+    # доступа JWT_COOKIE_SECURE = True
+
+    # Ограничиваем максимальный размер загружаемого файла до 16 МБ
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+    JWT_ACCESS_TOKEN_EXPIRES = 60 * 60 * 1  # Значение в секундах
+    UPLOAD_FOLDER = constants.UPLOAD_PATH
 
 
 class DevelopmentConfig(Config):
-    SECRET_KEY = 'py_messages_test_secret_key'
-    UPLOAD_FOLDER = constants.UPLOAD_PATH
+    SECRET_KEY = JWT_SECRET_KEY = 'py_messages_test_secret_key'
     ENV = 'development'
     DEBUG = True
+
+    # Пока на всех страницах сделан костыль, который в качестве API
+    # сервера выставляет текущий URL, дабы была возможность тестировать через
+    # ngrok
+    API_SERVER = 'http://localhost:5000'
+
     # Для рассылки email, необходимо заполнить следующие поля:
     # MAIL_SERVER =
     # MAIL_PORT =
@@ -46,10 +66,9 @@ class _EnvConfigMetaclass(type):
                 flask_var = flask_var.strip()
                 if value := os.environ.get(flask_var):
                     cls_attrs[flask_var] = eval(value)
-        return super(_EnvConfigMetaclass, mcs).__new__(mcs,
-                                                       cls_name,
-                                                       bases,
-                                                       cls_attrs)
+        return super(_EnvConfigMetaclass, mcs).__new__(
+            mcs, cls_name, bases, cls_attrs
+        )
 
 
 class EnvConfig(Config, metaclass=_EnvConfigMetaclass):
