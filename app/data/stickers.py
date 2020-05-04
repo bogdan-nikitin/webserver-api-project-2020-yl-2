@@ -4,6 +4,7 @@ from .db_session import SqlAlchemyBase
 
 
 class Stickers(SqlAlchemyBase):
+    """Модель стикеров."""
     __tablename__ = 'stickers'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,

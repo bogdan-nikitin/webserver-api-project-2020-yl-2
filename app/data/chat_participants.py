@@ -4,6 +4,7 @@ from .db_session import SqlAlchemyBase
 
 
 class ChatParticipants(SqlAlchemyBase):
+    """Модель участников чата."""
     __tablename__ = 'chat_participants'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,

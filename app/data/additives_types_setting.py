@@ -1,9 +1,10 @@
+from app.data import db_session
 from modules.constants import ADDITIVE_TYPES_TITLES
 from . import additives_types
-from app.data import db_session
 
 
 def set_types_table():
+    """Заполняет таблицу AdditivesTypes значениями."""
     session = db_session.create_session()
     # Очистим таблицу и заполним её заново
     session.query(additives_types.AdditivesTypes).delete()

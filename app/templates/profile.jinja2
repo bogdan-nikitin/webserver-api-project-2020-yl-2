@@ -7,6 +7,8 @@
 <script>
     $(function(){ $("{{ current_tab }}").tab('show'); });
 
+
+
 </script>
 {% endif %}
 {% endblock %}
@@ -44,13 +46,15 @@
                                  role="tabpanel"
                                  aria-labelledby="profileInfoTab">
                                 <!-- info_form -->
-                                <form action="" method="post" novalidate>
+                                <form action="" enctype="multipart/form-data"
+                                      method="post"
+                                      novalidate>
                                     {{ info_form.hidden_tag() }}
                                     <div class="form-group mb-3">
                                         <label for="userID">ID</label>
                                         <input class="form-control" id="userID"
                                                readonly type="text"
-                                               value="{{ current_user.get_id() }}">
+                                               value="{{ current_user.user_id }}">
                                     </div>
                                     {% for field in [info_form.first_name,
                                     info_form.second_name,
@@ -74,7 +78,7 @@
                                     {% endfor %}
                                     <div class="form-group">
                                         <div class="mb-3">Аватар</div>
-                                        <img src="static/img/logo.png"
+                                        <img src="{{ url_for('upload.uploaded_file', filename=current_user.avatar or '') }}"
                                              class="rounded-circle mb-3 profile-avatar-img"
                                              id="profileAvatarImg">
                                         <div class="custom-file"
@@ -133,7 +137,29 @@
                                 <!-- security_form -->
                                 <form action="" method="post" novalidate>
                                     {{ security_form.hidden_tag() }}
-                                    <div class="form-group mb-3">
+                                    <div class="form-group">
+                                        {% set field =
+                                        security_form.old_password %}
+                                        {{ field.label }}
+                                        {{ field(class="form-control
+                                        profile-security-field"
+                                        + ("
+                                        is-invalid" if field.errors else ""),
+                                        readonly=not bool(security_form.errors))
+                                        }}
+                                        <small id="{{ field.id }}Help"
+                                               class="form-text text-muted">
+                                            Чтобы поменять пароль или email,
+                                            необходимо ввести свой текущий
+                                            пароль
+                                        </small>
+                                        {% for error in field.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ translate_wtforms_error(error) }}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-group">
                                         {% set field = security_form.email %}
                                         {{ field.label }}
                                         {{ field(class="form-control
@@ -148,28 +174,7 @@
                                         </div>
                                         {% endfor %}
                                     </div>
-                                    <div class="form-group">
-                                        {% set field =
-                                        security_form.old_password %}
-                                        {{ field.label }}
-                                        {{ field(class="form-control
-                                        profile-security-field"
-                                        + ("
-                                        is-invalid" if field.errors else ""),
-                                        readonly=not bool(security_form.errors))
-                                        }}
-                                        <small id="{{ field.id }}Help"
-                                               class="form-text text-muted">
-                                            Введите это поле, только если вы
-                                            хотите
-                                            сменить пароль
-                                        </small>
-                                        {% for error in field.errors %}
-                                        <div class="invalid-feedback">
-                                            {{ translate_wtforms_error(error) }}
-                                        </div>
-                                        {% endfor %}
-                                    </div>
+
                                     <div class="form-group">
                                         {% set field = security_form.password %}
                                         {{ field.label }}
@@ -177,7 +182,8 @@
                                         profile-security-field"
                                         + ("
                                         is-invalid" if field.errors else ""),
-                                        readonly=not bool(security_form.errors))
+                                        readonly=not bool(security_form.errors),
+                                        autocomplete="off")
                                         }}
                                         {% for error in field.errors %}
                                         <div class="invalid-feedback">
@@ -194,7 +200,8 @@
                                         profile-security-field"
                                         + ("
                                         is-invalid" if field.errors else ""),
-                                        readonly=not bool(security_form.errors))
+                                        readonly=not bool(security_form.errors),
+                                        autocomplete="off")
                                         }}
                                         {% for error in field.errors %}
                                         <div class="invalid-feedback">

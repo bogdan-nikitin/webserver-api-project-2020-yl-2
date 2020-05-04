@@ -4,6 +4,7 @@ from .db_session import SqlAlchemyBase
 
 
 class Additives(SqlAlchemyBase):
+    """Модель приложений к сообщениям."""
     __tablename__ = 'additives'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,

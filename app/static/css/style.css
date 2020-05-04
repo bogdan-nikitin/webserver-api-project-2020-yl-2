@@ -9968,11 +9968,6 @@ h3 {
   color: white;
   text-decoration: none;
 }
-@media (max-width: 383px) {
-  .page-header-app-name {
-    display: none;
-  }
-}
 
 .page-header-logo-and-name {
   display: flex;
@@ -10001,6 +9996,7 @@ h3 {
 
 .page-header-user-avatar {
   width: 35px;
+  height: 35px;
 }
 
 .page-header-user-first-name {
@@ -10045,6 +10041,9 @@ h3 {
   color: lightgray;
   padding: 0 15px;
   font-size: 12px;
+}
+.page-footer-app-name *, .page-footer-app-name *:hover {
+  color: lightgray;
 }
 
 .page-footer-nav-block {
