@@ -1,9 +1,6 @@
 import werkzeug.datastructures
 from flask_restful import reqparse
 
-# get_parser = reqparse.RequestParser()
-# get_parser.add_argument('user_id', required=False)
-
 
 post_parser = reqparse.RequestParser()
 post_parser.add_argument('first_name', required=True)

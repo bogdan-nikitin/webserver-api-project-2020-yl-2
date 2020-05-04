@@ -1,18 +1,17 @@
 from flask import jsonify
+from flask_jwt_extended import jwt_required
 from flask_restful import Resource
-from flask_jwt_extended import current_user, jwt_required, get_jwt_identity
-from app.data import db_session
-from app.data.users import Users
-from app.data.users_friends import UsersFriends
+
 from app.api.resource_arguments.users_friends_args import (
     list_get_parser, post_parser, delete_parser
 )
 from app.api.users_utils import (
-    abort_if_user_not_found, USERS_PUBLIC_ONLY, USERS_PRIVATE_ONLY,
-    current_user_from_db, user_by_alt_id
+    abort_if_user_not_found, USERS_PUBLIC_ONLY, current_user_from_db,
+    user_by_alt_id
 )
-from modules.anything import anything
-from modules import constants
+from app.data import db_session
+from app.data.users import Users
+from app.data.users_friends import UsersFriends
 
 
 class UsersFriendsResource(Resource):
@@ -36,16 +35,16 @@ class UsersFriendsResource(Resource):
                 if action == 'accept':
                     if request_from_friend.is_accepted is True:
                         return jsonify({
-                            'error': 'Friend request from {0} already accepted'
-                            .format(friend.alternative_id)
+                            'error': f'Friend request from '
+                                     f'{friend.alternative_id} already accepted'
                         })
                     request_from_friend.is_accepted = True
                 else:
                     if request_from_friend.is_accepted is False:
                         return jsonify({
                             'error':
-                                f'Friend request from {0} already denied'
-                                    .format(friend.id)
+                                f'Friend request from {friend.id} already '
+                                f'denied'
                         })
                     request_from_friend.is_accepted = False
             elif request_from_cur_user:
@@ -64,8 +63,8 @@ class UsersFriendsResource(Resource):
                 if not (request_from_friend or request_from_cur_user):
                     return jsonify(
                         {'error': '{0} didn\'t send friend request to {1}'
-                         .format(friend.alternative_id,
-                                 cur_user.alternative_id)}
+                            .format(friend.alternative_id,
+                                    cur_user.alternative_id)}
                     )
         elif action == 'add':
             request = session.query(UsersFriends).filter(
@@ -73,8 +72,9 @@ class UsersFriendsResource(Resource):
                 (UsersFriends.invitee_id == friend.id)).first()
             if request:
                 return jsonify({
-                    'error': 'Friend request to {0} already sent'
-                    .format(friend.alternative_id)
+                    'error':
+                        'Friend request to {0} already sent'.format(
+                            friend.alternative_id)
                 })
             users_friends_obj = UsersFriends(
                 inviter_id=cur_user.id,
@@ -144,16 +144,3 @@ class UsersFriendsListResource(Resource):
                     for user in cur_user.friends
                 ]
             })
-
-        # res = []
-        # for friend in cur_user.friends:
-        #     users_friends_obj = session.query(UsersFriends) \
-        #         .filter(((UsersFriends.invitee_id == friend.id)
-        #                  | (UsersFriends.invitee_id == cur_user.id))
-        #                 and ((UsersFriends.inviter_id == friend.id)
-        #                      | (UsersFriends.inviter_id == cur_user.id))
-        #                 and UsersFriends.is_accepted == args['is_accepted'])
-        #     if users_friends_obj:
-        #         res.append(friend)
-        # return res
-

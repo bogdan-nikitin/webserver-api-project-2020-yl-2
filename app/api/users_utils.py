@@ -1,9 +1,10 @@
+"""Модуль с различными функциями для взаимодействия с моделью пользователей."""
+
+from flask_jwt_extended import get_jwt_identity
 from flask_restful import abort
 
 from app.data import db_session
 from app.data.users import Users
-from flask_jwt_extended import get_jwt_identity
-
 
 USERS_PRIVATE_ONLY = (
     'alternative_id', 'first_name', 'second_name', 'email',

@@ -4,22 +4,24 @@ import datetime
 import functools
 import urllib.parse
 
+import flask
 import requests
 from flask import request, current_app
 from flask_jwt_extended import (
     set_access_cookies, set_refresh_cookies, unset_access_cookies,
-    unset_refresh_cookies
+    unset_refresh_cookies, verify_jwt_in_request_optional
 )
-from flask_login import current_user
 from flask_socketio import disconnect
 from flask_wtf.csrf import generate_csrf
 
 
 def get_access_token():
+    """Получить access_token из куки."""
     return request.cookies.get(current_app.config['JWT_ACCESS_COOKIE_NAME'])
 
 
 def get_refresh_token():
+    """Получить refresh_token из куки."""
     return request.cookies.get(current_app.config['JWT_REFRESH_COOKIE_NAME'])
 
 
@@ -70,7 +72,7 @@ def authenticated_only(f):
 
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
-        if not current_user.is_authenticated:
+        if not verify_jwt_in_request_optional():
             disconnect()
         else:
             return f(*args, **kwargs)
@@ -94,6 +96,7 @@ def register_user(user_data) -> bool:
 
 
 def get_user_token(email, password):
+    """Получить токен подтверждения email пользователя через API."""
     response = requests.get(
         urllib.parse.urljoin(current_app.config['API_SERVER'], 'api/v1/tokens'),
         json={'email': email, 'password': password}
@@ -123,6 +126,10 @@ def nullable_bool(value):
 
 
 class APIModel:
+    """Базовая модель API сущности."""
+    # "API сущность" - объект, возвращаемый при обращении к API
+    # Данный класс - обёртка для таких объектов
+
     _attr_types = {}
     _url = None
     _json_key = None
@@ -134,15 +141,19 @@ class APIModel:
 
     @property
     def id(self):
+        """id сущности"""
         return self._id
 
     def _send_commit_request(self, **additional_json):
+        """Отправляет запрос к API и возвращает ответ."""
         return requests.put(self._url,
                             json={**self._set_model_attrs,
                                   'access_token': get_access_token(),
                                   **additional_json})
 
     def commit(self, **additional_json):
+        """Отправляет к API запрос на изменение данных сущности на присвоенные
+        данной модели."""
         response = self._send_commit_request(**additional_json)
         if response:
             json_response = response.json()
@@ -178,9 +189,13 @@ class APIModel:
         raise Exception(f'{response.status_code} {response.reason}')
 
     def update(self):
+        """Обновить данные модели."""
         self._model_attrs.clear()
 
     def _from_json(self, json_) -> bool:
+        """Метод отвечает за то, как будет парситься json сущности. По умолчанию
+        все атрибуты присваиваются словарю self._model_attrs. Если конвертация
+        прошла успешно, возвращает True, иначе False."""
         if model := json_.get(self._json_key):
             for k, v in model.items():
                 self._model_attrs[k] = v
@@ -188,10 +203,8 @@ class APIModel:
         return False
 
 
-import flask
-
-
 class UserAPIModel(APIModel):
+    """Модель API сущности пользователя."""
     _attr_types = {'created_date': datetime.datetime.fromisoformat}
     _json_key = 'user'
 
@@ -215,5 +228,4 @@ class UserAPIModel(APIModel):
                             data={**self._set_model_attrs,
                                   'access_token': get_access_token(),
                                   **additional_json},
-                            files={'avatar': self._avatar}
-                            )
+                            files={'avatar': self._avatar})

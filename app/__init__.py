@@ -113,6 +113,6 @@ def create_app() -> Flask:
     db_session.global_init(constants.DB_PATH)
 
     # Настройка приложения
-    app.before_request(csrf_protected)
+    app.before_request(csrf_protected)  # Защита от csrf перед запросом
 
     return app

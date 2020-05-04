@@ -1,11 +1,14 @@
 import sqlalchemy
 from sqlalchemy import orm
+from sqlalchemy_serializer import SerializerMixin
 
 from .db_session import SqlAlchemyBase
-from sqlalchemy_serializer import SerializerMixin
 
 
 class Chats(SqlAlchemyBase, SerializerMixin):
+    """Модель чатов."""
+    # Комментарий
+
     # Это почему-то ни в какую не работает
     # serialize_rules = ('-chat_participants',)
     serialize_only = ('id', 'first_author_id', 'second_author_id', 'title')

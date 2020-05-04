@@ -117,7 +117,7 @@ class UsersListResource(Resource):
             if limit > constants.USERS_LIST_RESOURCE_GET_COUNT:
                 return jsonify({
                     'error': 'Maximum limit is {0}'
-                    .format(constants.USERS_LIST_RESOURCE_GET_COUNT)
+                        .format(constants.USERS_LIST_RESOURCE_GET_COUNT)
                 })
         else:
             limit = constants.USERS_LIST_RESOURCE_GET_COUNT
@@ -141,4 +141,3 @@ class UsersListResource(Resource):
         return jsonify({
             'users': [user.to_dict(only=USERS_PUBLIC_ONLY) for user in users]
         })
-

@@ -1,11 +1,3 @@
-const apiServerUsersURL = new URL('/api/v1/users', apiServerURL);
-const apiServerUsersFriendsURL = new URL('/api/v1/users_friends/',
-                                         apiServerURL);
-const apiServerUsersFriendsListURL = new URL('/api/v1/users_friends',
-    apiServerURL);
-const apiServerMessagesURL = new URL('/api/v1/messages/', apiServerURL);
-const apiServerMessagesListURL = new URL('/api/v1/messages', apiServerURL);
-
 // Этот код позволяет использовать функцию jQuery.style(name, value, priority),
 // где priority - это important или же ничего. В чистом JQuery нет возможности
 // задать этот флаг.
@@ -28,7 +20,8 @@ const apiServerMessagesListURL = new URL('/api/v1/messages', apiServerURL);
     CSSStyleDeclaration.prototype.getPropertyValue = function(a) {
       return this.getAttribute(a);
     };
-    CSSStyleDeclaration.prototype.setProperty = function(styleName, value, priority) {
+    CSSStyleDeclaration.prototype.setProperty = function(styleName, value,
+                                                         priority) {
       this.setAttribute(styleName, value);
       var priority = typeof priority != 'undefined' ? priority : '';
       if (priority != '') {
@@ -36,7 +29,9 @@ const apiServerMessagesListURL = new URL('/api/v1/messages', apiServerURL);
         var rule = new RegExp(escape(styleName) + '\\s*:\\s*' + escape(value) +
             '(\\s*;)?', 'gmi');
         this.cssText =
-            this.cssText.replace(rule, styleName + ': ' + value + ' !' + priority + ';');
+            this.cssText.replace(
+                rule, styleName + ': ' + value + ' !' + priority + ';'
+            );
       }
     };
     CSSStyleDeclaration.prototype.removeProperty = function(a) {
@@ -223,10 +218,12 @@ Array.prototype.remove = function() {
     return this;
 };
 
+// Возвращает строку с полным именем пользователя user
 function fullUserName(user){
     return [user.second_name, user.first_name].join(' ');
 }
 
+// Проверка схожести объектов по их полям
 function isEqual(obj1, obj2){
     for (let prop in obj1){
         if (obj1[prop] != obj2[prop]){

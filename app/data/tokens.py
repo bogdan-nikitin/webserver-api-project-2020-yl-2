@@ -6,6 +6,7 @@ from .db_session import SqlAlchemyBase
 
 
 class Tokens(SqlAlchemyBase):
+    """Модель токенов для проверки email."""
     __tablename__ = 'tokens'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,

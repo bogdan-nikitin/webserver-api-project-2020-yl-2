@@ -260,6 +260,5 @@ def profile():
 def friends():
     param = {
         'title': 'Друзья - PyMessages',
-        # '': ''
     }
     return render_template('friends.jinja2', **param)

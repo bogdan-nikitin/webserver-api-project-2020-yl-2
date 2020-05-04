@@ -1,40 +1,21 @@
-from flask import jsonify
-from flask_restful import Resource, abort
+import datetime
+from operator import itemgetter
 
-from app.data import db_session
-from app.data.users import Users
-from app.data.messages import Messages
-from app.data.chats import Chats
-from app.data.chat_participants import ChatParticipants
+from flask import jsonify
+from flask_jwt_extended import jwt_required
+from flask_restful import Resource
+from flask_socketio import emit
+
+from app.api.chats_utils import get_chat
 from app.api.resource_arguments.messages_args import (
     post_parser, list_get_parser
 )
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.users_utils import current_user_from_db, user_by_alt_id
-import datetime
-from operator import itemgetter
-from flask_socketio import emit
-
-
-def get_chat(session, first_user, second_user):
-    chat = session.query(Chats).filter(
-        ((Chats.first_author_id == first_user.id) &
-         (Chats.second_author_id == second_user.id)) |
-        ((Chats.first_author_id == second_user.id) &
-         (Chats.second_author_id == first_user.id))).first()
-    return chat
-
-
-def abort_if_chat_not_found(chat_id):
-    session = db_session.create_session()
-    chat = session.query(Chats).get(chat_id)
-    if not chat:
-        abort(404, message=f'Chat {chat_id} not found')
-
-
-# def return_if_no_chat_or_receiver(chat_id, receiver_id):
-#     if not (chat_id or receiver_id) or (chat_id and receiver_id):
-#         return jsonify({'error': 'You must specify chat_id OR receiver_id'})
+from app.data import db_session
+from app.data.chat_participants import ChatParticipants
+from app.data.chats import Chats
+from app.data.messages import Messages
+from app.data.users import Users
 
 
 class MessagesResource(Resource):
@@ -77,7 +58,7 @@ class MessagesResource(Resource):
             chat = query.filter(Chats.id == chat_id).first()
             if not chat:
                 return jsonify({'error': 'Chat with id {0} not found'
-                                .format(chat_id)})
+                               .format(chat_id)})
         message = Messages(
             sender_id=cur_user.id,
             chat_id=chat.id,

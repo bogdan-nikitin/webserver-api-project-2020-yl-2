@@ -154,7 +154,7 @@ function loadFriendsFromSearch(searchReq=lastSearchRequest){
     }
     let friendsSearchList = $('#friendsSearchList');
     $.ajax({
-        url: apiServerUsersURL,
+        url: apiServerUsersListURL,
         data: {search_request: searchReq,
                start: currentFriendsSearchIndex,
                limit: friendsSearchLimit},
@@ -189,20 +189,8 @@ function loadFriends(){
                 let friendCard = getFriendCard(friend.user_id,
                                                fullUserName(friend));
                 friendsFriendsList.append(friendCard);
-//                else if (friend.is_accepted === false){
-//                    let deniedCard = getFriendCard(friend.user_id,
-//                                                   fullUserName(friend));
-//                    friendsDeniedList.append(deniedCard);
-//                }
-//                else if (friend.is_accepted === null){
-//                    let requestCard = getRequestCard(friend.user_id,
-//                                                     fullUserName(friend));
-//                    friendsRequestsList.append(requestCard);
-//                }
-
                 userFriendsIDs.push(friend.user_id);
             });
-//            searchFriends();
         }
     });
     $.ajax({

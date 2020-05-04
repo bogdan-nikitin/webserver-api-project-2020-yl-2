@@ -3,7 +3,39 @@ var socket = io();
 socket.on('connect', function() {
     console.log('Connected to WebSocket!');
 });
+
 socket.on('new_message', function(msg){
+    let userID = msg.sender_id;
+    if (userID != currentUserID && !hasChat(userID)){
+        $.ajax({
+            url: apiServerUsersURL,
+            method: "GET",
+            data: {user_id: msg.sender_id},
+            success(data){
+                let user = data.user;
+                let chatData = {
+                    user_id: userID,
+                    avatar: new URL(user.avatar, uploadsURL),
+                    last_msg: voidChar,
+                    user_name: fullUserName(user)
+                };
+                chatsData.set(userID, chatData);
+                appendChat(chatData);
+                handleNewMessage(msg);
+            }
+        });
+    }
+    handleNewMessage(msg);
+});
+
+function hasChat(ID){
+    return Boolean($(
+            `.index-chats-chat-item[data-chat-id="${ID}"],
+            .index-chats-chat-item[data-user-id="${ID}"]`
+        ).length);
+}
+
+function handleNewMessage(msg){
     let msgText = msg.text;
     let chatInfo = currentChatInfo();
     let msgElem;
@@ -18,7 +50,7 @@ socket.on('new_message', function(msg){
         scrollMessages();
     }
     changeLastMsg(chatInfo.user_id || chatInfo.chat_id, msgText);
-});
+}
 
 // Данный символ используется в тех местах, где должен был быть текст, но его
 // там не оказалось (костыль в общем)
@@ -77,15 +109,6 @@ function addNewField(){
     elem.after($(newElem));
     elem.hide();
     newElem.on('change', addNewField, appendAddition)
-//    let reader = new FileReader();
-//
-//    reader.onload = function(e) {
-//        console.log(e.target.result);
-//        console.log(e);
-////        $('img').attr('src', e.target.result);
-//    }
-//
-//    reader.readAsDataURL(this.files[0]);
 }
 
 function appendAddition(){
@@ -103,10 +126,6 @@ function appendAddition(){
                             src: e.target.result
                         }));
                         $('#indexAdditionsPhotoList').append(photo);
-                //        $('img').attr('src', e.target.result);
-//                        if (i == (arr.length - 1)){
-//                            $('#indexAdditionLoadingModal').modal('hide');
-//                        }
                         photo.click(removeAddition);
                     }
                     reader.readAsDataURL(file);
@@ -144,6 +163,10 @@ function removeAddition(){
 function getChat(options){
     let chat = $(chatHTML.format(options));
     return chat.click(switchChat);
+}
+
+function appendChat(options){
+    $('#indexMessagesChatsListGroup').append(getChat(options));
 }
 
 function getUserMsg(text){
@@ -185,7 +208,6 @@ function loadMessages(userID){
 }
 
 function loadChats(){
-    let chatsList = $('#indexMessagesChatsListGroup');
     $.ajax({
         url: apiServerMessagesListURL,
         success(data){
@@ -204,8 +226,7 @@ function loadChats(){
                             avatar: new URL(friend.avatar, uploadsURL)
                         }, chatsData.get(friend.user_id, {}));
                         chatsData.set(friend.user_id, chatData);
-                        let chat = getChat(chatData);
-                        chatsList.append(chat);
+                        appendChat(chatData);
                     });
                 }
             })

@@ -1,23 +1,16 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import jsonify
-from flask_restful import Resource, abort
+from flask_jwt_extended import jwt_required
+from flask_restful import Resource
 
-from app.data import db_session
-from app.data.users import Users
-from app.data.chats import Chats
-from app.data.messages import Messages
+from app.api.chats_utils import get_chat, abort_if_chat_not_found
 # from app.data.chat_participants import ChatParticipants
 from app.api.resource_arguments.chats_args import post_parser, delete_parser
 from app.api.users_utils import (
-    user_by_alt_id, abort_if_user_not_found, current_user_from_db
+    abort_if_user_not_found, current_user_from_db, user_by_alt_id
 )
-
-
-def abort_if_not_found(chat_id):
-    session = db_session.create_session()
-    chat = session.query(Chats).get(chat_id)
-    if not chat:
-        abort(404, message=f'Chat {chat_id} not found')
+from app.data import db_session
+from app.data.chats import Chats
+from app.data.messages import Messages
 
 
 class ChatsResource(Resource):
@@ -65,7 +58,7 @@ class ChatsResource(Resource):
         alt_id = args.get('alternative_id')
         chat_id = args.get('id')
         if chat_id:
-            abort_if_not_found(chat_id)
+            abort_if_chat_not_found(chat_id)
             session = db_session.create_session()
             chat = session.query(Chats).get(chat_id)
             messages = session.query(Messages).filter(
@@ -76,16 +69,11 @@ class ChatsResource(Resource):
             session.commit()
             return jsonify({'success': 'OK'})
         elif alt_id:
-            abort_if_user_not_found_by_alt_id(alt_id)
+            abort_if_user_not_found(alt_id)
             session = db_session.create_session()
-            user_id = session.query(Users).filter(
-                Users.alternative_id == alt_id).id
-            cur_user_id = flask_login.current_user.id
-            chat = session.query(Chats).filter(
-                ((Chats.first_author_id == user_id)
-                 | (Chats.first_author_id == cur_user_id))
-                and ((Chats.second_author_id == user_id)
-                     | (Chats.second_author_id == cur_user_id)))
+            user = user_by_alt_id(session, alt_id)
+            cur_user = current_user_from_db(session)
+            chat = get_chat(session, user, cur_user)
             session.delete(chat)
             session.commit()
             return jsonify({'success': 'OK'})

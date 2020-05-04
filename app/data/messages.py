@@ -1,13 +1,17 @@
-import sqlalchemy
 from datetime import datetime
+from functools import wraps
+
+import sqlalchemy
 from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
-from app.data.users import Users
+
 from app.data.db_session import SqlAlchemyBase, create_session
-from functools import wraps
+from app.data.users import Users
 
 
 class Messages(SqlAlchemyBase, SerializerMixin):
+    """Модель сообщений."""
+    # При сериализации конвертируем дату отправки в UNIX-время
     serialize_types = (
         (datetime, datetime.timestamp),
     )

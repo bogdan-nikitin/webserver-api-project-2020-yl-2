@@ -1,10 +1,9 @@
 import datetime
 import random
 import string
-from modules.anything import anything
+from functools import wraps
 
 import sqlalchemy
-from flask_login import UserMixin
 from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,11 +11,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.data import db_session
 from app.data.db_session import SqlAlchemyBase
 from app.data.users_friends import UsersFriends
-from functools import wraps
 from modules import constants
 
 
 def generate_alternative_id():
+    """Создаёт альтернативный id для пользователя, представляющий собой строку
+    из 10-20 случайных символов (чисел, букв, нижних подчёркиваний)"""
     size = random.randint(10, 20)
     alt_id = ''.join(
         random.choice(string.ascii_letters + string.digits + '_') for _ in
@@ -25,21 +25,27 @@ def generate_alternative_id():
 
 
 def create_alternative_id():
+    """Создаёт уникальный альтернативный id для пользователя."""
     session = db_session.create_session()
     alt_id = generate_alternative_id()
     query = session.query(Users).exists().where(
-        Users.alternative_id == 123)
+        Users.alternative_id == alt_id)
     while session.query(query).scalar():
         alt_id = generate_alternative_id()
     return alt_id
 
 
 class Users(SqlAlchemyBase, SerializerMixin):
+    """Модель пользователей."""
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True,
                            index=True)
+    # Альтернативный id нужен для того, чтобы при смене пароля у пользователя
+    # все его входы становились недействительными (т.к. при обращении к API
+    # используется именно alternative_id, а при смене пароля он генерируется
+    # заново)
     alternative_id = sqlalchemy.Column(sqlalchemy.String, index=True)
     first_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     second_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
@@ -50,6 +56,8 @@ class Users(SqlAlchemyBase, SerializerMixin):
     age = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     city = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     additional_inf = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+
+    # Подтверждён ли email пользователя
     is_confirmed = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     avatar = sqlalchemy.Column(sqlalchemy.String, nullable=True,
@@ -70,6 +78,10 @@ class Users(SqlAlchemyBase, SerializerMixin):
 
     @property
     def friends(self):
+        """Свойство возвращает всех друзей пользователя в виде FriendsList
+        (друзья - пользователи, заявки в друзья которых принял текущий
+        пользователь, либо пользователи, которые приняли заявку в друзья от
+        текущего)"""
         session = db_session.create_session()
         friends_list = FriendsList()
         users_query = session.query(Users)
@@ -100,5 +112,9 @@ class Users(SqlAlchemyBase, SerializerMixin):
 
 
 class FriendsList(list):
+    """Список друзей пользователя. При проверке наличия элемента в себе,
+    проверяет, есть ли в списке пользователь с таким же id, как и у переданного
+    пользователя."""
+
     def __contains__(self, user: Users):
         return any(friend.id == user.id for friend in self)

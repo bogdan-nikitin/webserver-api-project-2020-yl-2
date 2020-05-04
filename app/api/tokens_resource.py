@@ -1,9 +1,10 @@
-from flask_restful import Resource, abort
 from flask import jsonify
+from flask_restful import Resource, abort
+
+from app.api.resource_arguments import tokens_args
+from app.data import db_session
 from app.data.tokens import Tokens
 from app.data.users import Users
-from app.data import db_session
-from app.api.resource_arguments import tokens_args
 
 
 class TokensResource(Resource):
