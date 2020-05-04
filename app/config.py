@@ -10,11 +10,15 @@ class Config:
     WTF_CSRF_CHECK_DEFAULT = False
     JWT_COOKIE_CSRF_PROTECT = False
     JWT_SESSION_COOKIE = False
-    # Параметр отвечает за то, будут ли куки отправляться только по протоколу
-    # HTTPS. В данный момент у приложения нет сертификата, так что параметр
-    # равен False. Но при запуске приложения на прод, то крайне желательно
-    # поставить True, т.к. иначе злоумышленник сможет похитить ключ доступа
-    # JWT_COOKIE_SECURE = True
+
+    # Параметр ниже отвечает за то, будут ли куки отправляться только по
+    # протоколу HTTPS. В данный момент у приложения нет сертификата, так что
+    # параметр равен False. Но при запуске приложения на прод, то крайне
+    # желательно поставить True, т.к. иначе злоумышленник сможет похитить ключ
+    # доступа JWT_COOKIE_SECURE = True
+
+    # Ограничиваем максимальный размер загружаемого файла до 16 МБ
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 
 
 class DevelopmentConfig(Config):
@@ -24,10 +28,9 @@ class DevelopmentConfig(Config):
     ENV = 'development'
     DEBUG = True
 
-    # Переменная не относится к библиотекам, сам сюда её впихнул
-    # Вообще, теперь невозможно использовать сервер через ngrok вне локальной
-    # сети, т.к. приложение не знает, через какие там туннели оно работает,
-    # а потому с веб-страниц невозможно посылать API запросы.
+    # Пока на всех страницах сделан костыль, который в качестве API
+    # сервера выставляет текущий URL, дабы была возможность тестировать через
+    # ngrok
     API_SERVER = 'http://localhost:5000'
 
     # Для рассылки email, необходимо заполнить следующие поля:
@@ -63,10 +66,9 @@ class _EnvConfigMetaclass(type):
                 flask_var = flask_var.strip()
                 if value := os.environ.get(flask_var):
                     cls_attrs[flask_var] = eval(value)
-        return super(_EnvConfigMetaclass, mcs).__new__(mcs,
-                                                       cls_name,
-                                                       bases,
-                                                       cls_attrs)
+        return super(_EnvConfigMetaclass, mcs).__new__(
+            mcs, cls_name, bases, cls_attrs
+        )
 
 
 class EnvConfig(Config, metaclass=_EnvConfigMetaclass):

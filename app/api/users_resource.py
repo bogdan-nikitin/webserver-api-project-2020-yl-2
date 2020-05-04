@@ -3,15 +3,24 @@ from flask_jwt_extended import (
     get_jwt_identity, jwt_optional, current_user, jwt_required
 )
 from flask_restful import Resource, abort
+
 from app.api.resource_arguments.users_args import *
 from app.api.users_utils import (
     USERS_PRIVATE_ONLY, USERS_PUBLIC_ONLY, abort_if_user_not_found, users_like,
     current_user_from_db, user_by_alt_id
 )
-from app.data import db_session
-from app.data.users import Users
-from app.data.tokens import Tokens
 from app.auth_utils import create_email_token
+from app.data import db_session
+from app.data.tokens import Tokens
+from app.data.users import Users
+from modules import constants
+from modules.save_to_uploads import save_to_uploads
+
+
+def set_avatar_to_user(user, avatar):
+    if avatar:
+        filename = save_to_uploads(avatar)
+        user.avatar = filename
 
 
 def create_token(user, session=None):
@@ -72,7 +81,7 @@ class UsersResource(Resource):
         user.age = args.get('age') or user.age
         user.additional_inf = args.get('additional_inf') or user.additional_inf
         user.city = args.get('city') or user.city
-        user.avatar = args.get('avatar') or user.avatar
+        set_avatar_to_user(user, args.avatar)
         session.commit()
         return jsonify({'user_id': user.alternative_id})
 
@@ -91,8 +100,8 @@ class UsersResource(Resource):
             age=args.get('age'),
             additional_inf=args.get('additional_inf'),
             city=args.get('city'),
-            avatar=args.get('avatar')
         )
+        set_avatar_to_user(user, args.avatar)
         user.set_attributes(args['password'])
         session.add(user)
         create_token(user, session=session)

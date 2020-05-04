@@ -1,22 +1,22 @@
 """Пакет приложения. Содержит фабрику приложений create_app, а также функции,
 используемые в обработчике шаблонов Jinja2."""
 
-import logging
 import os
 import re
 
 from flask import Flask
-from flask_restful import Api
 from flask_jwt_extended import get_current_user
-from app.data import db_session
-from app.setup_app import *
-from app.socketio_namespaces import socket_index, socket_main
-from app.views import main, uploads
-from modules import constants
+from flask_restful import Api
+
+from app.api import (users_resource, users_friends_resource, chats_resource,
+                     messages_resource, auth_resources, ee, tokens_resource)
 from app.auth_utils import csrf_protected
 from app.data import db_session
-from app.api import (users_resource, users_friends_resource, chats_resource,
-                     messages_resource, auth_resources, tokens_resource)
+from app.data import db_session
+from app.setup_app import *
+from app.socketio_namespaces import socket_main
+from app.views import main, uploads
+from modules import constants
 
 
 def translate_wtforms_error(error_text):
@@ -77,7 +77,6 @@ def create_app() -> Flask:
     # login_manager.login_view = 'main.login'
 
     # Регистрация пространств имён Socket.IO
-    socketio.on_namespace(socket_index.IndexNamespace('/index'))
     socketio.on_namespace(socket_main.MainNamespace('/'))
 
     # Регистрация чертежей
@@ -94,12 +93,12 @@ def create_app() -> Flask:
                       '/api/v1/users_friends')
     api_.add_resource(users_friends_resource.UsersFriendsResource,
                       '/api/v1/users_friends/')
+    ee.__i(api_)
     api_.add_resource(chats_resource.ChatsResource, '/api/v1/chats/')
     api_.add_resource(messages_resource.MessagesResource, '/api/v1/messages/')
     api_.add_resource(messages_resource.MessagesListResource,
                       '/api/v1/messages')
     api_.add_resource(tokens_resource.TokensResource, '/api/v1/tokens')
-
     # Настройки окружения Jinja2
     app.jinja_env.add_extension('jinja2.ext.do')
     app.add_template_global(print)

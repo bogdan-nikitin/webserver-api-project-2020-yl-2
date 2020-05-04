@@ -1,11 +1,10 @@
-from flask import jsonify, request, current_app
-from flask_jwt_extended import (
-    create_access_token, create_refresh_token, get_jwt_identity,
-    jwt_refresh_token_required, verify_jwt_refresh_token_in_request,
-    get_raw_jwt, decode_token, view_decorators, jwt_optional
-)
 import datetime
 
+from flask import jsonify
+from flask_jwt_extended import (
+    create_access_token, create_refresh_token, get_jwt_identity,
+    jwt_refresh_token_required
+)
 from flask_restful import Resource, abort
 
 from app.api.resource_arguments.auth_args import login_post_parser
@@ -32,12 +31,8 @@ class LoginResource(Resource):
         email = args.email
         session = db_session.create_session()
         user: Users = session.query(Users).filter(Users.email == email).first()
-        if not user:
-            abort(404, message=f'User with email {email} not found')
-            return
-        password = args.password
-        if not user.check_password(password):
-            abort(401, message='Bad password')
+        if not user or not user.check_password(args.password):
+            abort(404, message='Bad email or password')
             return
         user_id = user.alternative_id
         try:

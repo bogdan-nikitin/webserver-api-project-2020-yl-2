@@ -46,7 +46,9 @@
                                  role="tabpanel"
                                  aria-labelledby="profileInfoTab">
                                 <!-- info_form -->
-                                <form action="" method="post" novalidate>
+                                <form action="" enctype="multipart/form-data"
+                                      method="post"
+                                      novalidate>
                                     {{ info_form.hidden_tag() }}
                                     <div class="form-group mb-3">
                                         <label for="userID">ID</label>

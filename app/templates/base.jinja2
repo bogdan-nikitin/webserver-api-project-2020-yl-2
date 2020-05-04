@@ -22,17 +22,11 @@
           href="{{ url_for('static', filename='img/favicon.ico') }}">
     <script type="text/javascript">
         var csrfToken = "{{ csrf_token() }}";
+        var refreshTime = ({{ current_app.config['JWT_ACCESS_TOKEN_EXPIRES'] }} - 5 * 60) * 1000;
 
-        $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
-                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) &&
-                        !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
-                }
-            }
-        });
-
-        const apiServerURL = new URL("{{ current_app.config['API_SERVER'] }}");
+        // const apiServerURL = new URL("{{ current_app.config['API_SERVER'] }}");
+        // TODO Поменять код ниже, если API сервер изменится
+        const apiServerURL = new URL(window.location.origin);
 
         const uploadsURL = new URL(
             "{{ url_for('upload.uploaded_file', filename='') }}",
@@ -45,6 +39,7 @@
         var currentUserID = null;
         {% endif %}
     </script>
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
     <title>{{ title }}</title>
     {% block head_end %}{% endblock %}
 </head>
@@ -64,8 +59,7 @@
             {% if not hide_user and current_user %}
             <div class="col-auto">
                 <div class="page-header-user d-flex align-items-center">
-                    <!-- TODO Вставить реальные данные и фото -->
-                    <span class="badge badge-pill badge-light mr-2">5</span>
+                    <!--                    <span class="badge badge-pill badge-light mr-2">5</span>-->
                     <div class="dropdown">
                         <a class="page-header-user-first-name dropdown-toggle mr-2"
                            href="#" role="button" id="pageHeaderUserDropdown"
@@ -88,7 +82,8 @@
                                href="{{ url_for('main.logout') }}">Выйти</a>
                         </div>
                     </div>
-                    <img src="{{ url_for('upload.uploaded_file', filename=current_user.avatar or '') }}" alt=""
+                    <img alt=""
+                         src="{{ url_for('upload.uploaded_file', filename=current_user.avatar or '') }}"
                          class="page-header-user-avatar rounded-circle">
                 </div>
             </div>
@@ -135,7 +130,10 @@
                     </div>
                 </div>
                 <div class="page-footer-app-name">
-                    PyMessages, 2020
+                    PyMessages, 2020<br>
+                    <a href="https://github.com/bogdan-nikitin/webserver-api-project-2020-yl-2">
+                        Github
+                    </a>
                 </div>
             </div>
         </div>

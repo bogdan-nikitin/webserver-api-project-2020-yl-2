@@ -5,17 +5,14 @@ import functools
 import urllib.parse
 
 import requests
+from flask import request, current_app
 from flask_jwt_extended import (
     set_access_cookies, set_refresh_cookies, unset_access_cookies,
-    unset_refresh_cookies, get_raw_jwt, verify_jwt_in_request_optional,
-    jwt_optional, get_csrf_token
+    unset_refresh_cookies
 )
 from flask_login import current_user
 from flask_socketio import disconnect
-from flask import request, current_app
-from modules import constants
-
-import logging
+from flask_wtf.csrf import generate_csrf
 
 
 def get_access_token():
@@ -139,11 +136,14 @@ class APIModel:
     def id(self):
         return self._id
 
+    def _send_commit_request(self, **additional_json):
+        return requests.put(self._url,
+                            json={**self._set_model_attrs,
+                                  'access_token': get_access_token(),
+                                  **additional_json})
+
     def commit(self, **additional_json):
-        response = requests.put(self._url,
-                                json={**self._set_model_attrs,
-                                      'access_token': get_access_token(),
-                                      **additional_json})
+        response = self._send_commit_request(**additional_json)
         if response:
             json_response = response.json()
             if user_id := json_response.get('user_id'):
@@ -188,6 +188,9 @@ class APIModel:
         return False
 
 
+import flask
+
+
 class UserAPIModel(APIModel):
     _attr_types = {'created_date': datetime.datetime.fromisoformat}
     _json_key = 'user'
@@ -195,8 +198,22 @@ class UserAPIModel(APIModel):
     def __init__(self, user_id):
         self._url = urllib.parse.urljoin(current_app.config['API_SERVER'],
                                          '/api/v1/users/')
+        self._avatar = None
         super().__init__(user_id)
 
     @property
     def user_id(self):
         return self.id
+
+    def set_avatar(self, val):
+        self._avatar = val.stream
+
+    def _send_commit_request(self, **additional_json):
+        return requests.put(self._url,
+                            cookies={**flask.request.cookies},
+                            headers={'X-CSRFToken': generate_csrf()},
+                            data={**self._set_model_attrs,
+                                  'access_token': get_access_token(),
+                                  **additional_json},
+                            files={'avatar': self._avatar}
+                            )

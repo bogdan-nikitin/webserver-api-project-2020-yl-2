@@ -7,40 +7,31 @@ import urllib.parse
 
 import flask
 from flask import (Blueprint, render_template, redirect, url_for, abort,
-                   make_response, current_app)
+                   make_response)
 from flask_jwt_extended import (
-    jwt_required, current_user, jwt_optional, verify_jwt_in_request,
-    get_csrf_token
+    jwt_required, current_user, jwt_refresh_token_required
 )
-from app.api_utils import get_access_token
 from flask_mail import Message
 
-from app.auth_utils import (
-    create_email_token
-)
-from app.api_utils import refresh_user
-from app.email_utils import send_msg_in_thread
-from app.forms import *
 from app.api_utils import (
     WrongUserDataError, login_user, logout_user, register_user, get_user_token,
     verify_email_by_token
 )
-from app.setup_app import csrf
+from app.api_utils import refresh_user
+from app.email_utils import send_msg_in_thread
+from app.forms import *
 from modules import constants
 
 blueprint = Blueprint('main', __name__)
 
 
-# @blueprint.route('/refresh', methods=['GET'])
-# @jwt_refresh_token_required
-# def refresh():
-#     user_id = get_jwt_identity()
-#     ret = {
-#         'access_token': create_access_token(identity=user_id)
-#     }
-#     next_ = flask.request.args.get('next', url_for('main.login'))
-#     r = make_response()
-#     return jr
+@blueprint.route('/refresh', methods=['GET'])
+@jwt_refresh_token_required
+def refresh():
+    next_ = flask.request.args.get('next', url_for('main.index'))
+    r = make_response(redirect(next_))
+    refresh_user(r)
+    return r
 
 
 @blueprint.route('/index', methods=['POST', 'GET'])
@@ -196,6 +187,7 @@ def profile():
         current_user.age = info_form.age.data
         current_user.city = info_form.city.data
         current_user.additional_inf = info_form.additional_inf.data
+        current_user.set_avatar(info_form.avatar.data)
         current_user.commit()
         param = {
             'title': title,

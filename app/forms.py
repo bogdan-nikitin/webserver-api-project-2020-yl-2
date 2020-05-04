@@ -1,5 +1,7 @@
 """Модуль со всеми формами приложения."""
 
+import os
+
 import phonenumbers
 from flask_wtf import FlaskForm
 from wtforms import (StringField, PasswordField, BooleanField, SubmitField,
@@ -7,6 +9,7 @@ from wtforms import (StringField, PasswordField, BooleanField, SubmitField,
 from wtforms.validators import (DataRequired, Email, EqualTo, ValidationError,
                                 NumberRange, Optional)
 
+from modules import constants
 from modules.named_flask_form_field import named_flask_form_field as named_field
 
 FIELD_MUST_BE_FILLED_IN = 'Это поле необходимо заполнить'
@@ -28,6 +31,35 @@ class PhoneNumber:
                 raise ValidationError(self.message)
         except phonenumbers.NumberParseException:
             raise ValidationError(self.message)
+
+
+class UploadSet:
+    def __init__(self, extensions_allowed=(), extensions_forbidden=(),
+                 message=None):
+        self.extensions_allowed, self.extensions_forbidden = [], []
+        self._allowed_extensions, self._forbidden_extensions = '', ''
+        if extensions_allowed:
+            self.extensions_allowed = set(extensions_allowed)
+            self._allowed_extensions = ', '.join(self.extensions_allowed)
+            self.message = 'Вы можете загрузить файл только в расширениях ' \
+                           '{allowed_extensions}'
+        elif extensions_forbidden:
+            self.extensions_forbidden = set(extensions_forbidden)
+            self._forbidden_extensions = ', '.join(self.extensions_forbidden)
+            self.message = 'Вы не можете загрузить файлы с расширениями ' \
+                           '{forbidden_extensions}'
+        if message:
+            self.message = message
+
+    def __call__(self, form, field):
+        _, ext = os.path.splitext(field.data.filename)
+        ext = ext[1:]
+        if self.extensions_allowed and ext not in self.extensions_allowed:
+            raise ValidationError(self.message.format(
+                allowed_extensions=self._allowed_extensions))
+        elif self.extensions_forbidden and ext in self.extensions_forbidden:
+            raise ValidationError(self.message.format(
+                forbidden_extensions=self._forbidden_extensions))
 
 
 class LoginForm(FlaskForm):
@@ -69,7 +101,12 @@ class ChangeProfileInfoForm(FlaskForm):
     )
     city = named_field(StringField)('Город')
     additional_inf = named_field(TextAreaField)('Дополнительная информация')
-    avatar = named_field(FileField)('Аватар')
+    avatar = named_field(FileField)(
+        'Аватар',
+        validators=[Optional(), UploadSet(
+            extensions_allowed=constants.ALLOWED_PHOTO_EXTENSIONS
+        )]
+    )
 
     submit = SubmitField('Сохранить изменения')
 
