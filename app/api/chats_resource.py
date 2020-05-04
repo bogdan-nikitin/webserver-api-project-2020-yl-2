@@ -19,7 +19,11 @@ class ChatsResource(Resource):
     def get():
         session = db_session.create_session()
         cur_user = current_user_from_db(session)
-        return jsonify({'chats': [chat.to_dict() for chat in cur_user.chats]})
+        chats = cur_user.chats_first_author + cur_user.chats_second_author
+        if chats:
+            return jsonify({'chats': [chat.to_dict() for chat in chats]})
+        else:
+            jsonify({'message': 'No chats'})
 
     @jwt_required
     def post(self):
@@ -74,7 +78,10 @@ class ChatsResource(Resource):
             user = user_by_alt_id(session, alt_id)
             cur_user = current_user_from_db(session)
             chat = get_chat(session, user, cur_user)
-            session.delete(chat)
-            session.commit()
-            return jsonify({'success': 'OK'})
+            if chat:
+                session.delete(chat)
+                session.commit()
+                return jsonify({'success': 'OK'})
+            else:
+                return jsonify({'message': f'No chat with User {alt_id}'})
         return jsonify({'error': 'Bad request'})

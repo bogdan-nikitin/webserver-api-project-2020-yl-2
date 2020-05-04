@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.data import db_session
 from app.data.db_session import SqlAlchemyBase
 from app.data.users_friends import UsersFriends
+from app.data.chats import Chats
 from modules import constants
 
 
@@ -65,8 +66,10 @@ class Users(SqlAlchemyBase, SerializerMixin):
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
     messages = orm.relation('Messages', backref='message_sender')
-    chats = orm.relation('Chats', secondary='chat_participants',
-                         backref='chat_member')
+    chats_first_author = orm.relation('Chats', backref='chat_member_1',
+                                      foreign_keys=[Chats.first_author_id])
+    chats_second_author = orm.relation('Chats', backref='chat_member_2',
+                                       foreign_keys=[Chats.second_author_id])
     incoming_friend_requests = orm.relation(
         'UsersFriends', backref='inviter',
         foreign_keys=[UsersFriends.invitee_id]

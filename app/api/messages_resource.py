@@ -38,8 +38,8 @@ class MessagesResource(Resource):
                     return jsonify({'error': 'User {0} isn\' your friend'
                                    .format(cur_user.alternative_id)})
                 chat = Chats()
-                chat.first_author_id = cur_user.id
-                chat.second_author_id = receiver.id
+                chat.first_author_id = cur_user.alternative_id
+                chat.second_author_id = receiver.alternative_id
                 session.add(chat)
                 session.commit()
                 chat_id = chat.id
