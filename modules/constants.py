@@ -85,3 +85,5 @@ JWT_LIVE_TIME = datetime.timedelta(days=1)
 USERS_LIST_RESOURCE_GET_COUNT = 20
 
 USER_DEFAULT_AVATAR = 'avatar.jpg'
+
+DOCS_BASE_TEMPLATE = 'docs_inherited.jinja2'

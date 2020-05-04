@@ -1,6 +1,7 @@
 """Пакет приложения. Содержит фабрику приложений create_app, а также функции,
 используемые в обработчике шаблонов Jinja2."""
 
+import logging
 import os
 import re
 
@@ -8,15 +9,15 @@ from flask import Flask
 from flask_jwt_extended import get_current_user
 from flask_restful import Api
 
-from app.api import (users_resource, users_friends_resource, chats_resource,
-                     messages_resource, auth_resources, ee, tokens_resource)
+from app.api import (
+    users_resource, users_friends_resource, chats_resource, messages_resource
+)
 from app.auth_utils import csrf_protected
-from app.data import db_session
 from app.data import db_session
 from app.setup_app import *
 from app.socketio_namespaces import socket_main
-from app.views import main, uploads
-from modules import constants
+from app.views import main, uploads, docs
+from modules import constants, md_conversion
 
 
 def translate_wtforms_error(error_text):
@@ -82,6 +83,7 @@ def create_app() -> Flask:
     # Регистрация чертежей
     app.register_blueprint(main.blueprint)
     app.register_blueprint(uploads.blueprint)
+    app.register_blueprint(docs.blueprint)
 
     # Регистрация API
     api_.add_resource(auth_resources.LoginResource, '/api/v1/login/')
@@ -108,6 +110,11 @@ def create_app() -> Flask:
     app.add_template_global(constants, 'constants')
     app.add_template_global(app, 'current_app')
     app.context_processor(lambda: dict(current_user=get_current_user()))
+
+    # Генерация документации
+    with app.app_context():
+        md_conversion.convert_all_md('app/docs/',
+                                     'app/docs/cached/')
 
     # Инициализация БД
     db_session.global_init(constants.DB_PATH)

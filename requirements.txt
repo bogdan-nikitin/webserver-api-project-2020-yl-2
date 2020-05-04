@@ -14,6 +14,8 @@ Flask-SocketIO==4.3.0
 Flask-WTF==0.14.3
 idna==2.9
 itsdangerous==1.1.0
+Jinja2==2.11.1
+Markdown==3.2.1
 Jinja2==2.11.2
 Markdown==3.2.1
 MarkupSafe==1.1.1
