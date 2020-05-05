@@ -245,6 +245,21 @@ function currentChatInfo(){
 }
 
 
+function searchChat(){
+    let searchText = $('#indexChatsAndFriendsSearchInput').val();
+    let chatsList = $('#indexMessagesChatsListGroup');
+    chatsList.children().each(function(i, chatElem){
+        chatElem = $(chatElem);
+        if (chatElem.text().includes(searchText)){
+            chatElem.show();
+        }
+        else{
+            chatElem.hide();
+        }
+    });
+}
+
+
 // Следующий код выполнится после загрузки DOM
 $(document).ready(function (){
     freezeScroll('#indexCurrentChatMessagesList', '#indexChatsList');
@@ -337,6 +352,8 @@ $(document).ready(function (){
     loadChats();
 
     $('#indexCurrentChatBlock').style('display', 'none', 'important');
+
+    $('#indexSearchForm').on('submit', searchChat);
 })
 
 // Следующий код выполнится после полной загрузки документа
