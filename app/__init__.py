@@ -7,7 +7,7 @@ import re
 from flask import Flask
 from flask_jwt_extended import get_current_user
 from flask_restful import Api
-
+from flask_sslify import SSLify
 from app.api import (
     users_resource, users_friends_resource, chats_resource, messages_resource,
     tokens_resource, ee, auth_resources
@@ -73,6 +73,8 @@ def create_app() -> Flask:
     api_ = Api(app)
     jwt.init_app(app)
     csrf.init_app(app)
+    with app.app_context():
+        SSLify(app)
 
     # Настройка частей приложения
     # login_manager.login_view = 'main.login'
