@@ -1,10 +1,9 @@
 {% macro friend(type) %}
 
-<li class="card mb-2 friends-friend-card" data-user-id="{friend_id}"
-    data-user-name="{friend_name}">
+<li class="card mb-2 friends-friend-card" data-user-id="{friend_id}">
     <div class="card-body">
         <div class="media">
-            <img src="static/img/logo.png" class="mr-3 friends-friend-avatar">
+            <img src="{avatar}" class="mr-3 friends-friend-avatar rounded-circle">
             <div class="media-body d-flex justify-content-between">
                 <div class="friends-friend-description">
                     <h5 class="mt-0 mb-1">{friend_name}</h5>
