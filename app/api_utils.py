@@ -219,7 +219,7 @@ class UserAPIModel(APIModel):
         return self.id
 
     def set_avatar(self, val):
-        self._avatar = val.stream
+        self._avatar = val
 
     def _send_commit_request(self, **additional_json):
         return requests.put(self._url,
@@ -228,4 +228,6 @@ class UserAPIModel(APIModel):
                             data={**self._set_model_attrs,
                                   'access_token': get_access_token(),
                                   **additional_json},
-                            files={'avatar': self._avatar})
+                            files={'avatar': (self._avatar.filename,
+                                              self._avatar.stream,
+                                              self._avatar.mimetype)})

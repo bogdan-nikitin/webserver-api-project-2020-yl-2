@@ -15,10 +15,17 @@ from app.data.tokens import Tokens
 from app.data.users import Users
 from modules import constants
 from modules.save_to_uploads import save_to_uploads
+import os
 
 
 def set_avatar_to_user(user, avatar):
     if avatar:
+        _, ext = os.path.splitext(avatar.filename)
+        if ext[1:] not in constants.ALLOWED_PHOTO_EXTENSIONS:
+            return jsonify(
+                {'error': 'Avatar extension must be {0}'
+                    .format(','.join(constants.ALLOWED_PHOTO_EXTENSIONS))}
+            )
         filename = save_to_uploads(avatar)
         user.avatar = filename
 
@@ -55,7 +62,8 @@ class UsersResource(Resource):
 
         session = db_session.create_session()
         user = current_user_from_db(session)
-
+        if error := set_avatar_to_user(user, args.avatar):
+            return error
         old_password = args.old_password
         email = args.email
         password = args.password
@@ -81,7 +89,6 @@ class UsersResource(Resource):
         user.age = args.get('age') or user.age
         user.additional_inf = args.get('additional_inf') or user.additional_inf
         user.city = args.get('city') or user.city
-        set_avatar_to_user(user, args.avatar)
         session.commit()
         return jsonify({'user_id': user.alternative_id})
 
@@ -92,16 +99,16 @@ class UsersResource(Resource):
         if session.query(Users).filter(
                 Users.email == args['email']).first():
             return jsonify({'error': 'This user already exists'})
-        user = Users(
-            first_name=args['first_name'],
-            second_name=args['second_name'],
-            email=args['email'],
-            phone_number=args.get('phone_number'),
-            age=args.get('age'),
-            additional_inf=args.get('additional_inf'),
-            city=args.get('city'),
-        )
-        set_avatar_to_user(user, args.avatar)
+        user = Users()
+        if error := set_avatar_to_user(user, args.avatar):
+            return error
+        user.first_name = args['first_name']
+        user.second_name = args['second_name']
+        user.email = args['email']
+        user.phone_number = args.get('phone_number')
+        user.age = args.get('age')
+        user.additional_inf = args.get('additional_inf')
+        user.city = args.get('city')
         user.set_attributes(args['password'])
         session.add(user)
         create_token(user, session=session)

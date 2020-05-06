@@ -2,6 +2,7 @@ from flask import jsonify
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource
 
+from app.api.chats_utils import create_chat
 from app.api.resource_arguments.users_friends_args import (
     list_get_parser, post_parser, delete_parser
 )
@@ -39,6 +40,12 @@ class UsersFriendsResource(Resource):
                                      f'{friend.alternative_id} already accepted'
                         })
                     request_from_friend.is_accepted = True
+                    # Создаём чат между пользователями сразу, т.к. иначе на
+                    # главной странице пользователь не будет добавлен в
+                    # комнату SocketIO с чатом между этими пользователями, и
+                    # соответственно не будет получать сообщения от этого
+                    # пользователя
+                    create_chat(session, cur_user, friend)
                 else:
                     if request_from_friend.is_accepted is False:
                         return jsonify({

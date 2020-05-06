@@ -207,6 +207,20 @@ function loadMessages(userID){
     });
 }
 
+function loadChatData(userID){
+    $.ajax({
+        url: apiServerChatsURL,
+        data: {chat_with: userID},
+        success(data){
+            let chatData = $.extend({
+                chat_with: userID,
+            }, chatsData.get(userID, {}), data.chat);
+            chatsData.set(userID, chatData);
+            $('.index-chats-chat-item').attr('data-chat-id', data.chat.id);
+        }
+    });
+}
+
 function loadChats(){
     $.ajax({
         url: apiServerMessagesListURL,
@@ -219,14 +233,18 @@ function loadChats(){
                 url: apiServerUsersFriendsListURL,
                 success(data){
                     data.friends.forEach(function(friend, i, arr){
+                        let curChatData = chatsData.get(friend.user_id, {});
                         let chatData = $.extend({
                             user_id: friend.user_id,
                             user_name: fullUserName(friend),
                             last_msg: voidChar,
                             avatar: new URL(friend.avatar, uploadsURL)
-                        }, chatsData.get(friend.user_id, {}));
+                        }, curChatData);
                         chatsData.set(friend.user_id, chatData);
                         appendChat(chatData);
+                        if (!curChatData){
+                            loadChatData(friend.user_id);
+                        }
                     });
                 }
             })

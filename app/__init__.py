@@ -96,6 +96,7 @@ def create_app() -> Flask:
     api_.add_resource(users_friends_resource.UsersFriendsResource,
                       '/api/v1/users_friends/')
     ee.__i(api_)
+    api_.add_resource(chats_resource.ChatsListResource, '/api/v1/chats')
     api_.add_resource(chats_resource.ChatsResource, '/api/v1/chats/')
     api_.add_resource(messages_resource.MessagesResource, '/api/v1/messages/')
     api_.add_resource(messages_resource.MessagesListResource,

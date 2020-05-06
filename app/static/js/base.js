@@ -6,6 +6,7 @@ const apiServerUsersFriendsListURL = new URL('/api/v1/users_friends',
     apiServerURL);
 const apiServerMessagesURL = new URL('/api/v1/messages/', apiServerURL);
 const apiServerMessagesListURL = new URL('/api/v1/messages', apiServerURL);
+const apiServerChatsURL = new URL('/api/v1/chats/', apiServerURL);
 
 
 // Устанавливаем CSRF токен перед отправкой AJAX запросов
