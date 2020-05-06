@@ -21,7 +21,7 @@ class MainNamespace(Namespace):
             join_room(f'user_{identity}')
             response = requests.get(
                 urllib.parse.urljoin(flask.current_app.config['API_SERVER'],
-                                     '/api/v1/chats/'),
+                                     '/api/v1/chats'),
                 json={'access_token': get_access_token()}
             )
             if response:

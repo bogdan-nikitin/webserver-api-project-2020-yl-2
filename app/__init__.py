@@ -7,6 +7,7 @@ import re
 from flask import Flask
 from flask_jwt_extended import get_current_user
 from flask_restful import Api
+
 from app.api import (
     users_resource, users_friends_resource, chats_resource, messages_resource,
     tokens_resource, ee, auth_resources
@@ -100,7 +101,7 @@ def create_app() -> Flask:
     api_.add_resource(messages_resource.MessagesListResource,
                       '/api/v1/messages')
     api_.add_resource(tokens_resource.TokensResource, '/api/v1/tokens')
-    
+
     # Настройки окружения Jinja2
     app.jinja_env.add_extension('jinja2.ext.do')
     app.add_template_global(print)
