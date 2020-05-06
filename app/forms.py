@@ -52,14 +52,15 @@ class UploadSet:
             self.message = message
 
     def __call__(self, form, field):
-        _, ext = os.path.splitext(field.data.filename)
-        ext = ext[1:]
-        if self.extensions_allowed and ext not in self.extensions_allowed:
-            raise ValidationError(self.message.format(
-                allowed_extensions=self._allowed_extensions))
-        elif self.extensions_forbidden and ext in self.extensions_forbidden:
-            raise ValidationError(self.message.format(
-                forbidden_extensions=self._forbidden_extensions))
+        if field.data:
+            _, ext = os.path.splitext(field.data.filename)
+            ext = ext[1:]
+            if self.extensions_allowed and ext not in self.extensions_allowed:
+                raise ValidationError(self.message.format(
+                    allowed_extensions=self._allowed_extensions))
+            elif self.extensions_forbidden and ext in self.extensions_forbidden:
+                raise ValidationError(self.message.format(
+                    forbidden_extensions=self._forbidden_extensions))
 
 
 class LoginForm(FlaskForm):

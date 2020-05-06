@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required
 from flask_restful import Resource
 from flask_socketio import emit
 
-from app.api.chats_utils import get_chat
+from app.api.chats_utils import get_chat, create_chat
 from app.api.resource_arguments.messages_args import (
     post_parser, list_get_parser
 )
@@ -37,23 +37,7 @@ class MessagesResource(Resource):
                 if cur_user not in receiver.friends:
                     return jsonify({'error': 'User {0} isn\' your friend'
                                    .format(cur_user.alternative_id)})
-                chat = Chats()
-                chat.first_author_id = cur_user.id
-                chat.second_author_id = receiver.id
-                session.add(chat)
-                session.commit()
-                chat_id = chat.id
-
-                cur_user_participant = ChatParticipants()
-                cur_user_participant.chat_id = chat_id
-                cur_user_participant.user_id = cur_user.id
-
-                receiver_participant = ChatParticipants()
-                receiver_participant.chat_id = chat_id
-                receiver_participant.user_id = receiver.id
-
-                chat.chat_participants += [cur_user_participant,
-                                           receiver_participant]
+                create_chat(session, cur_user, receiver)
         else:
             chat = query.filter(Chats.id == chat_id).first()
             if not chat:
@@ -119,9 +103,10 @@ class MessagesListResource(Resource):
                     chat_with = users_query.get(
                         chat.first_author_id
                     ).alternative_id
-                last_message_dict = msg_query.filter(
-                    Messages.chat_id == chat_id
-                ).first().to_dict()
-                last_message_dict['chat_with'] = chat_with
-                messages += [last_message_dict]
+                if last_msg := msg_query.filter(
+                        Messages.chat_id == chat_id
+                ).first():
+                    last_message_dict = last_msg.to_dict()
+                    last_message_dict['chat_with'] = chat_with
+                    messages += [last_message_dict]
             return jsonify({'messages': messages})
