@@ -3,6 +3,7 @@ let friendsSearchLimit = 20;
 let loadNewOn = 10;
 let lastSearchRequest = "";
 let userFriendsIDs = [];
+let usersData = new Map();
 
 function actionWithFriend(friend_id, action, options={}){
     $.ajax($.extend({
@@ -12,35 +13,43 @@ function actionWithFriend(friend_id, action, options={}){
     }, options));
 }
 
-function getFriendCard(userID, userName){
+function getFriendCard(userID){
+    let user = usersData.get(userID);
     let friendCard = $(friendHTML.format({
-        friend_id: userID, friend_name: userName
+        friend_id: userID, friend_name: fullUserName(user),
+        avatar: new URL(user.avatar, uploadsURL)
     }));
     friendCard.find('.friends-delete-friend-btn').click(deleteFriend);
     return friendCard;
 }
 
-function getDeniedCard(userID, userName){
+function getDeniedCard(userID){
+    let user = usersData.get(userID);
     let deniedCard = $(friendDeniedHTML.format({
-        friend_id: userID, friend_name: userName
+        friend_id: userID, friend_name: fullUserName(user),
+        avatar: new URL(user.avatar, uploadsURL)
     }));
     deniedCard.find('.friends-add-friend-btn').click(addDeniedFriend);
     return deniedCard;
 }
 
 function getNewFriendCard(userID, userName){
+    let user = usersData.get(userID);
     let newFriendCard = $(friendNewHTML.format({
         friend_id: userID,
-        friend_name: userName
+        friend_name: fullUserName(user),
+        avatar: new URL(user.avatar, uploadsURL)
     }));
     newFriendCard.find('.friends-add-friend-btn').click(addNewFriend);
     return newFriendCard;
 }
 
 function getRequestCard(userID, userName){
+    let user = usersData.get(userID);
     let requestCard = $(friendRequestHTML.format({
         friend_id: userID,
-        friend_name: userName
+        friend_name: fullUserName(user),
+        avatar: new URL(user.avatar, uploadsURL)
     }));
     requestCard.find('.friends-add-friend-btn').click(acceptFriendRequest);
     requestCard.find('.friends-deny-friend-btn').click(denyFriend);
@@ -48,9 +57,11 @@ function getRequestCard(userID, userName){
 }
 
 function getOutgoingCard(userID, userName){
+    let user = usersData.get(userID);
     let outgoingCard = $(friendOutgoingHTML.format({
         friend_id: userID,
-        friend_name: userName
+        friend_name: fullUserName(user),
+        avatar: new URL(user.avatar, uploadsURL)
     }));
     outgoingCard.find('.friends-cancel-request-btn').click(cancelFriendRequest);
     return outgoingCard;
@@ -75,10 +86,9 @@ function deleteFriend(){
     let userID = this.getAttribute('data-user-id');
     let friendCard = $(`#friendsFriendsList
         .friends-friend-card[data-user-id="${userID}"]`);
-    let userName = $(friendCard).attr('data-user-name');
     actionWithFriend(userID, 'deny', {
         success(data){
-            let deniedCard = getDeniedCard(userID, userName);
+            let deniedCard = getDeniedCard(userID);
             friendCard.remove();
             $('#friendsDeniedList').append(deniedCard);
         }
@@ -89,10 +99,9 @@ function acceptFriendRequest(){
     let userID = this.getAttribute('data-user-id');
     let requestCard = $(`#friendsRequestsList
         .friends-friend-card[data-user-id="${userID}"]`);
-    let userName = $(requestCard).attr('data-user-name');
     actionWithFriend(userID, 'accept', {
         success(data){
-            let friendCard = getFriendCard(userID, userName);
+            let friendCard = getFriendCard(userID);
             requestCard.remove();
             $('#friendsFriendsList').append(friendCard);
         }
@@ -103,10 +112,9 @@ function addDeniedFriend(){
     let userID = this.getAttribute('data-user-id');
     let deniedCard = $(`#friendsDeniedList
         .friends-friend-card[data-user-id="${userID}"]`);
-    let userName = $(deniedCard).attr('data-user-name');
     actionWithFriend(userID, 'accept', {
         success(data){
-            let friendCard = getFriendCard(userID, userName);
+            let friendCard = getFriendCard(userID);
             deniedCard.remove();
             $('#friendsFriendsList').append(friendCard);
         }
@@ -117,10 +125,9 @@ function denyFriend(){
     let userID = this.getAttribute('data-user-id');
     let requestCard = $(`#friendsRequestsList
         .friends-friend-card[data-user-id="${userID}"]`);
-    let userName = $(requestCard).attr('data-user-name');
     actionWithFriend(userID, 'deny', {
         success(data){
-            let deniedCard = getDeniedCard(userID, userName);
+            let deniedCard = getDeniedCard(userID);
             requestCard.remove();
             $('#friendsDeniedList').append(deniedCard);
         }
@@ -131,11 +138,10 @@ function addNewFriend(){
     let userID = this.getAttribute('data-user-id');
     let newFriendCard = $(`#friendsSearchList
         .friends-friend-card[data-user-id="${userID}"]`);
-    let userName = newFriendCard.attr('data-user-name');
     actionWithFriend(userID, 'add', {
         success(data){
             newFriendCard.remove();
-            let outgoingCard = getOutgoingCard(userID, userName);
+            let outgoingCard = getOutgoingCard(userID);
             $('#friendsOutgoingList').append(outgoingCard);
             userFriendsIDs.push(userID);
         }
@@ -165,8 +171,8 @@ function loadFriendsFromSearch(searchReq=lastSearchRequest){
                     userFriendsIDs.includes(user.user_id)){
                     return;
                 }
-                let newFriendCard = getNewFriendCard(user.user_id,
-                                                     fullUserName(user));
+                usersData.set(user.user_id, user);
+                let newFriendCard = getNewFriendCard(user.user_id);
                 if (i + 1 == loadNewOn){
                     newFriendCard.appear(loadFriendsFromSearch, {once: true});
                 }
@@ -186,8 +192,8 @@ function loadFriends(){
         url: apiServerUsersFriendsListURL,
         success(data){
             data.friends.forEach(function(friend, i, arr){
-                let friendCard = getFriendCard(friend.user_id,
-                                               fullUserName(friend));
+                usersData.set(friend.user_id, friend);
+                let friendCard = getFriendCard(friend.user_id);
                 friendsFriendsList.append(friendCard);
                 userFriendsIDs.push(friend.user_id);
             });
@@ -198,8 +204,8 @@ function loadFriends(){
         data: {type: "outgoing"},
         success(data){
             data.friends.forEach(function(friend, i, arr){
-                let outgoingCard = getOutgoingCard(friend.user_id,
-                                                   fullUserName(friend));
+                usersData.set(friend.user_id, friend);
+                let outgoingCard = getOutgoingCard(friend.user_id);
                 friendsOutgoingList.append(outgoingCard);
                 userFriendsIDs.push(friend.user_id);
             });
@@ -210,14 +216,13 @@ function loadFriends(){
         data: {type: "incoming"},
         success(data){
             data.friends.forEach(function(friend, i, arr){
+                usersData.set(friend.user_id, friend);
                 if (friend.is_accepted === false){
-                    let deniedCard = getDeniedCard(friend.user_id,
-                                                   fullUserName(friend));
+                    let deniedCard = getDeniedCard(friend.user_id);
                     friendsDeniedList.append(deniedCard);
                 }
                 else if (friend.is_accepted === null){
-                    let requestCard = getRequestCard(friend.user_id,
-                                                     fullUserName(friend));
+                    let requestCard = getRequestCard(friend.user_id);
                     friendsRequestsList.append(requestCard);
                 }
                 userFriendsIDs.push(friend.user_id);
