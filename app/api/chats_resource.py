@@ -19,11 +19,7 @@ class ChatsResource(Resource):
     def get():
         session = db_session.create_session()
         cur_user = current_user_from_db(session)
-        chats = cur_user.chats_first_author + cur_user.chats_second_author
-        if chats:
-            return jsonify({'chats': [chat.to_dict() for chat in chats]})
-        else:
-            jsonify({'message': 'No chats'})
+        return jsonify({'chats': [chat.to_dict() for chat in cur_user.chats]})
 
     @jwt_required
     def post(self):

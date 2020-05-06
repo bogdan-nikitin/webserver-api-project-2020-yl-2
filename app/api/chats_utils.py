@@ -8,10 +8,10 @@ from app.data.chats import Chats
 
 def get_chat(session, first_user, second_user):
     chat = session.query(Chats).filter(
-        ((Chats.first_author_id == first_user.alternative_id) &
-         (Chats.second_author_id == second_user.alternative_id)) |
-        ((Chats.first_author_id == second_user.alternative_id) &
-         (Chats.second_author_id == first_user.alternative_id))).first()
+        ((Chats.first_author_id == first_user.id) &
+         (Chats.second_author_id == second_user.id)) |
+        ((Chats.first_author_id == second_user.id) &
+         (Chats.second_author_id == first_user.id))).first()
     return chat
 
 
