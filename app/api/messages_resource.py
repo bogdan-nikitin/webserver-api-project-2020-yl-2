@@ -35,7 +35,7 @@ class MessagesResource(Resource):
             chat = get_chat(session, cur_user, receiver)
             if not chat:
                 if cur_user not in receiver.friends:
-                    return jsonify({'error': 'User {0} isn\' your friend'
+                    return jsonify({'error': 'User {0} isn\'t your friend'
                                    .format(cur_user.alternative_id)})
                 create_chat(session, cur_user, receiver)
         else:

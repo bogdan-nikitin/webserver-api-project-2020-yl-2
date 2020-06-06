@@ -12,6 +12,6 @@ post_parser.add_argument('second_author_id', required=True, type=str)
 # post_parser.add_argument('chat_participants', required=True, type=list)
 
 delete_parser = reqparse.RequestParser()
-delete_parser.add_argument('id', type=int)
-delete_parser.add_argument('user_id', type=str)
+delete_parser.add_argument('chat_id', type=int)
+delete_parser.add_argument('chat_with', type=str)
 

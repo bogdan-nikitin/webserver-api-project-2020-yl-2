@@ -88,8 +88,8 @@ class ChatsResource(Resource):
     @jwt_required
     def delete(self):
         args = delete_parser.parse_args()
-        alt_id = args.get('user_id')
-        chat_id = args.get('id')
+        alt_id = args.get('chat_with')
+        chat_id = args.get('chat_id')
         session = db_session.create_session()
         cur_user = current_user_from_db(session)
         if chat_id:

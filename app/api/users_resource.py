@@ -123,8 +123,9 @@ class UsersListResource(Resource):
         if limit := args.get('limit'):
             if limit > constants.USERS_LIST_RESOURCE_GET_COUNT:
                 return jsonify({
-                    'error': 'Maximum limit is {0}'
-                        .format(constants.USERS_LIST_RESOURCE_GET_COUNT)
+                    'error': 'Maximum limit is {0}'.format(
+                        constants.USERS_LIST_RESOURCE_GET_COUNT
+                    )
                 })
         else:
             limit = constants.USERS_LIST_RESOURCE_GET_COUNT
