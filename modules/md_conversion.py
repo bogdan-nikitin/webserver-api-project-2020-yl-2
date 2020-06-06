@@ -19,8 +19,12 @@ def markdown_to_html(base, file_to_convert, path):
     ) as md_file:
         all_file = md_file.read()
     html = markdown.markdown(all_file)
+    new_file = os.path.join(constants.ROOT_DIR, path)
+    new_file_dir = os.path.dirname(new_file)
+    if not os.path.exists(new_file_dir):
+        os.makedirs(new_file_dir)
     with open(
-            os.path.join(constants.ROOT_DIR, path), 'w', encoding='utf-8'
+            new_file, 'w', encoding='utf-8'
     ) as html_file:
         html_file.write(base.replace('%DOCUMENTATION%', html))
 
