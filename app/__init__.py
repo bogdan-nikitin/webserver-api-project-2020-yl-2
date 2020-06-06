@@ -6,12 +6,8 @@ import re
 
 from flask import Flask
 from flask_jwt_extended import get_current_user
-from flask_restful import Api
 
-from app.api import (
-    users_resource, users_friends_resource, chats_resource, messages_resource,
-    tokens_resource, ee, auth_resources
-)
+from app.api import api_blueprint
 from app.auth_utils import csrf_protected
 from app.data import db_session
 from app.setup_app import *
@@ -66,16 +62,11 @@ def create_app() -> Flask:
         os.makedirs(constants.UPLOAD_PATH)
 
     # Инициализация частей приложения
-    # login_manager.init_app(app)
     mail.app = app
     mail.init_app(app)
     socketio.init_app(app)
-    api_ = Api(app)
     jwt.init_app(app)
     csrf.init_app(app)
-
-    # Настройка частей приложения
-    # login_manager.login_view = 'main.login'
 
     # Регистрация пространств имён Socket.IO
     socketio.on_namespace(socket_main.MainNamespace('/'))
@@ -84,24 +75,7 @@ def create_app() -> Flask:
     app.register_blueprint(main.blueprint)
     app.register_blueprint(uploads.blueprint)
     app.register_blueprint(docs.blueprint)
-
-    # Регистрация API
-    api_.add_resource(auth_resources.LoginResource, '/api/v1/login/')
-    api_.add_resource(auth_resources.RefreshResource, '/api/v1/refresh/')
-    api_.add_resource(users_resource.UsersListResource, '/api/v1/users')
-    api_.add_resource(users_resource.UsersResource, '/api/v1/users/',
-                      '/api/v1/users/<string:user_id>')
-    api_.add_resource(users_friends_resource.UsersFriendsListResource,
-                      '/api/v1/users_friends')
-    api_.add_resource(users_friends_resource.UsersFriendsResource,
-                      '/api/v1/users_friends/')
-    ee.__i(api_)
-    api_.add_resource(chats_resource.ChatsListResource, '/api/v1/chats')
-    api_.add_resource(chats_resource.ChatsResource, '/api/v1/chats/')
-    api_.add_resource(messages_resource.MessagesResource, '/api/v1/messages/')
-    api_.add_resource(messages_resource.MessagesListResource,
-                      '/api/v1/messages')
-    api_.add_resource(tokens_resource.TokensResource, '/api/v1/tokens')
+    app.register_blueprint(api_blueprint, url_prefix='/api/v1/')
 
     # Настройки окружения Jinja2
     app.jinja_env.add_extension('jinja2.ext.do')

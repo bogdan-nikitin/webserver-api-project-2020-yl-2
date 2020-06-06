@@ -8,15 +8,20 @@ def load_base():
     base_path = os.path.join(flask.current_app.root_path,
                              flask.current_app.template_folder,
                              constants.DOCS_BASE_TEMPLATE)
-    with open(base_path) as base:
+    with open(base_path, encoding='utf-8', errors='replace') as base:
         return base.read()
 
 
 def markdown_to_html(base, file_to_convert, path):
-    with open(os.path.join(constants.ROOT_DIR, file_to_convert), 'r') as md_file:
+    with open(
+            os.path.join(constants.ROOT_DIR, file_to_convert), 'r',
+            encoding='utf-8', errors='replace'
+    ) as md_file:
         all_file = md_file.read()
     html = markdown.markdown(all_file)
-    with open(os.path.join(constants.ROOT_DIR, path), 'w') as html_file:
+    with open(
+            os.path.join(constants.ROOT_DIR, path), 'w', encoding='utf-8'
+    ) as html_file:
         html_file.write(base.replace('%DOCUMENTATION%', html))
 
 

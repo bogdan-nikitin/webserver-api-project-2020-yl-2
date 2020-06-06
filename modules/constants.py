@@ -23,7 +23,8 @@ PAGE_NAV_LINKS = {
     'Регистарция': 'main.register',
     'Профиль': 'main.profile',
     'Друзья': 'main.friends',
-    'Выйти': 'main.logout'
+    'Документация к API': 'docs.api_docs',
+    'Выйти': 'main.logout',
 }
 
 # URL почт по доменам. Необходимо, чтобы при регистрации отсылать пользователя
